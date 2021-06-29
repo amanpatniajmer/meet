@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MS Teams Clone</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+</head>
+
+<body>
+    <header>
+
+    </header>
+    <div>
+        <div class="side-nav">
+            <a>
+                <i class="fa fa-bell-o"></i>
+            </a>
+            <a>
+                <i class="fa fa-commenting-o"></i>
+            </a>
+            <a class="active">
+                <i class="fa fa-phone"></i>
+            </a>
+            <a href="../index.html">
+                <i class="fa fa-history"></i>
+            </a>
+        </div>
+
+        <div class="main-window">
+            <nav class="main-nav nav">
+                <ul>
+                    <h1>Meeting App</h1>
+                    <li class="right-align">
+                        <div class="avatar">
+                            AJ
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <div class="history">
+                <div class="tab-heading">Contacts</div>
+                <div class="tab">
+                    <input type="text" name="search" placeholder="Type a name" onkeyup="searchContacts(this.value)">
+                    <div class="filters">
+                        <button class="btn-primary border-radius" id="addContact"><i class="fa fa-plus-circle"></i> Add new Contact</button>
+                    </div>
+                    <div id="contactsList">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="addContactModal" class="modal">
+        <div class="modalBox border-radius">
+            <h1>Add new Contact <button class="right-align btn-danger" id="addContactClose"><i class="fa fa-close"></i></button></h1>
+            <div class="content">
+                <form id="addContactForm">
+                    <label>Enter Contact name:</label>
+                    <input type="text" name="name" />
+                    <label>Enter Contact email:</label>
+                    <input type="email" name="email" />
+                    <div class="text-center"><button type="submit" class="btn-success">Add <i
+                                class="fa fa-plus-circle"></i></button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="editContactModal" class="modal">
+        <div class="modalBox border-radius">
+            <h1>Edit Contact <button class="right-align btn-danger" id="editContactClose"><i class="fa fa-close"></i></button></h1>
+            <div class="content">
+                <form id="editContactForm">
+                    <label>Edit contact name:</label>
+                    <input type="text" name="name" />
+                    <label>Edit contact email:</label>
+                    <input type="email" name="email" />
+                    <div class="text-center"><button type="submit" class="btn-success">Edit <i
+                                class="fa fa-pencil"></i></button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="loading">
+        <div id="loader"></div>
+    </div>
+    <div id="alert" class="alert alert-danger">
+        <span>{msg}</span>
+        <span><i class="fa fa-check-circle"></i></span>
+    </div>
+    <script src="./utils.js"></script>
+    <script src="./calls_contacts.js"></script>
+    <script>
+        let contacts = [{
+            "id": "0",
+            "name": "Aman Jain",
+            "email": "amanpatniajmer@gmail.com"
+        }, {
+            "id": "1",
+            "name": "Aanchal Jain",
+            "email": "aanchal.jain.eee19@itbhu.ac.in"
+        }];
+
+        function stopLoading() {
+            document.getElementById('loading').style.display = "none";
+        }
+
+        function startLoading() {
+            document.getElementById('loading').style.display = "flex";
+            console.log('loading')
+        }
+
+        updateContactsList(contacts, "contactsList");
+
+        let addContactForm = document.getElementById('addContactForm');
+        addContactForm.onsubmit = function(e) {
+            e.preventDefault();
+            showAlert("success", "Contact Saved", "fa-check");
+            startLoading();
+            setTimeout(stopLoading, 1000);
+            const newContact = formToJSON(e.target);
+            contacts.push(newContact);
+            updateContactsList(contacts, 'contactsList');
+            addContactForm.reset();
+        }
+        document.getElementById('addContactClose').onclick = () => toggleVisibility('addContactModal', 'block');
+        let newContactBtn = document.getElementById('addContact');
+        newContactBtn.onclick = function() {
+            document.getElementById('addContactModal').style.display = 'block';
+        }
+
+        document.getElementById('editContactClose').onclick = () => toggleVisibility('editContactModal', 'block');
+        let editIndex = null;
+
+        function editContact(index) {
+            editIndex = index;
+            document.getElementById('editContactModal').style.display = 'block';
+            let form = document.getElementById('editContactForm');
+            for (let key in contacts[index]) {
+                if (!form.elements.hasOwnProperty(key)) continue;
+                form.elements[key].value = contacts[index][key];
+            }
+        }
+        let editContactForm = document.getElementById('editContactForm');
+        editContactForm.onsubmit = function(e) {
+            e.preventDefault();
+            showAlert("success", "Successfully edited contact", "fa-check");
+            startLoading();
+            setTimeout(stopLoading, 2000);
+            const newContact = formToJSON(e.target);
+            contacts[editIndex] = newContact;
+            updateContactsList(contacts, 'contactsList');
+            editContactForm.reset();
+            editIndex = null;
+        }
+
+        function deleteContact(index) {
+            contacts.splice(index, 1);
+            showAlert("success", "Successfully Deleted!", "fa-check")
+            updateContactsList(contacts, 'contactsList');
+        }
+
+        function setCallee(callee) {
+            localStorage.setItem("callee", callee)
+            window.location.href = "./videoCall.html";
+        }
+
+        function searchContacts(val) {
+            updateContactsList(filter(contacts, val), "contactsList");
+        }
+    </script>
+
+</body>
+
+</html>
