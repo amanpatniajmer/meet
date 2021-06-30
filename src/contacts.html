@@ -161,12 +161,11 @@
             .add(newContact)
             .then((res)=>{
                 showAlert("success", "Contact Saved", "fa-check");
+                contacts.push({...newContact, id:res.id});
+                updateContactsList(contacts, 'contactsList');
                 setTimeout(stopLoading, 1);
             })
             .catch((err)=>console.log(err));
-
-            contacts.push(newContact);
-            updateContactsList(contacts, 'contactsList');
             addContactForm.reset();
         }
         document.getElementById('addContactClose').onclick = () => toggleVisibility('addContactModal', 'block');

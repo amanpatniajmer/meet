@@ -158,6 +158,7 @@ function onConnectionStateChange() {
     /*document.getElementById('remoteVideo' + index).playsInline = true;
     document.getElementById('remoteVideo' + index).muted = true; */
     console.log('Received and adding in remoteVideo' + index)
+    return index;
 }
 
 function toggleAudio() {
@@ -219,6 +220,7 @@ function addIceCandidates() {
 }
 
 function registerPeerConnectionListeners(peerConnection) {
+    let index=null;
     peerConnection.addEventListener('icecandidate', (e) => onAddIceCandidate(e))
     peerConnection.addEventListener('icegatheringstatechange', () => {
         console.log(
@@ -228,7 +230,11 @@ function registerPeerConnectionListeners(peerConnection) {
     peerConnection.addEventListener('connectionstatechange', () => {
         switch (peerConnection.connectionState) {
             case 'connected':
-                onConnectionStateChange();
+                index=onConnectionStateChange();
+                break;
+            case 'failed':
+                if(index) removeRemoteVideo(index, participants);
+                break;
 
         }
         console.log(`Connection state change: ${peerConnection.connectionState}`, peerConnection);
