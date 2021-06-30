@@ -81,3 +81,18 @@ function logout(){
         console.log(error)
     });
 }
+
+function listenAuthChange(){
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            localStorage.setItem('name', user.displayName);
+            localStorage.setItem('email', user.email);
+            localStorage.setItem('uid', user.uid);
+            if(location.href.includes('/login.html'))location.href="/index.html";
+        } else {
+            console.log('Logged out')
+            console.log(location.href)
+            if(!location.href.includes('/login.html'))location.href='/login.html'
+        }
+    });
+}
