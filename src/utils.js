@@ -75,8 +75,7 @@ function getAvatarColor(name) {
 
 function logout(){
     firebase.auth().signOut().then(() => {
-        localStorage.removeItem('user');
-        location.href="/login.html";
+        localStorage.clear();
     }).catch((error) => {
         console.log(error)
     });

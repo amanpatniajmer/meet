@@ -4,7 +4,7 @@ console.log(roomID);
 let connection = null;
 let localStream = null;
 let remoteStream = null;
-let remoteId = null;
+let remoteID = null;
 let roomDB = null;
 var firebaseConfig = {
     apiKey: "AIzaSyAoThvyDnMKikCSZTzd00zp0_03lekKgGs",
@@ -75,7 +75,7 @@ async function call() {
         roomDB.onSnapshot(async(snapshot) => {
             const data = snapshot.data();
             if (!connection.currentRemoteDescription && data.answer) {
-                remoteId = data.answer.id;
+                remoteID = data.answer.id;
                 console.log('Set remote description: ', data.answer);
                 const answer = new RTCSessionDescription(data.answer)
                 await connection.setRemoteDescription(answer);
@@ -103,6 +103,7 @@ async function joinRoom(roomID) {
     roomDB.get().then(async(doc) => {
         if (doc.exists) {
             const offer = doc.data().offer;
+            remoteID = offer.id;
             console.log(offer);
             connection = new RTCPeerConnection(RTCconfig);
             registerPeerConnectionListeners(connection);
@@ -118,7 +119,7 @@ async function joinRoom(roomID) {
                 answer: {
                     type: answer.type,
                     sdp: answer.sdp,
-                    id: localStorage.getItem("id")
+                    id: localStorage.getItem("uid")
                 }
             }
             console.log(room)
@@ -126,7 +127,6 @@ async function joinRoom(roomID) {
 
             await roomDB.set(room);
             await collectIceCandidates(roomDB, connection, localStorage.getItem("uid"), offer.id);
-            remoteId = offer.id;
         }
     })
 }
@@ -140,13 +140,15 @@ function onConnectionStateChange() {
     console.log(connection.connectionState);
     let index = -1;
     for (let i = 0; i < participants.length; i++) {
-        if (participants[i]['id'] == remoteId) {
+        console.log(participants[i])
+        console.log(remoteID)
+        if (participants[i]['id'] == remoteID) {
             index = i;
             break;
         }
     }
     if (index == -1) {
-        let participant = { id: remoteId };
+        let participant = { id: remoteID };
         index = createRemoteVideo(participant);
         if (index === -1) {
             showAlert("danger", "Cannot add more participants. Please remove one to continue.", "fa-close");
@@ -219,6 +221,12 @@ function addIceCandidates() {
     console.log("remaining", iceCandidates.length);
 }
 
+function dataChannel(){
+    sendChannel = localConnection.createDataChannel("sendChannel");
+sendChannel.onopen = handleSendChannelStatusChange;
+sendChannel.onclose = handleSendChannelStatusChange;
+}
+
 function registerPeerConnectionListeners(peerConnection) {
     let index=null;
     peerConnection.addEventListener('icecandidate', (e) => onAddIceCandidate(e))
@@ -233,6 +241,7 @@ function registerPeerConnectionListeners(peerConnection) {
                 index=onConnectionStateChange();
                 break;
             case 'failed':
+                console.log('failed', index)
                 if(index) removeRemoteVideo(index, participants);
                 break;
 

@@ -163,9 +163,9 @@
         }];
         showAddParticipants('addParticipantsList');
         let user = {
-            "id": "0",
-            "name": "Aanchal Jain",
-            "email": "aanchal.jain.eee19@itbhu.ac.in",
+            "id": localStorage.getItem('uid'),
+            "name": localStorage.getItem('name'),
+            "email": localStorage.getItem('email'),
             "screen": false
         };
         let participants = [user];
