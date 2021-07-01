@@ -3,7 +3,7 @@ let roomID = window.location.search.substr(6, window.location.search.length - 1)
 console.log(roomID);
 let connection = null;
 let localStream = null;
-let remoteStream = null;
+let remoteStream = new MediaStream();
 let remoteID = null;
 let roomDB = null;
 var firebaseConfig = {
@@ -28,14 +28,14 @@ const RTCconfig = {
     iceCandidatePoolSize: 10
 };
 
-async function collectIceCandidates(roomRef, peerConnection,
+async function collectRemoteIceCandidates(roomRef, peerConnection,
     localName, remoteName) {
     console.log(localName)
     console.log(remoteName)
 
     roomRef.collection(remoteName).onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
-            if (change.type === "added") {
+            if (change.type === "added" && change.doc.id!=="details") {
                 const candidate = new RTCIceCandidate(change.doc.data());
                 peerConnection.addIceCandidate(candidate);
                 console.log("RemoteiceCandidate", candidate);
@@ -43,15 +43,24 @@ async function collectIceCandidates(roomRef, peerConnection,
         });
     })
 }
+
+async function collectDetails(roomRef, remoteName) {
+    console.log(remoteName)
+    roomRef.collection(remoteName).doc("details").onSnapshot((snapshot) => {
+        if(snapshot.data() && snapshot.data().muted){
+            console.log("Muted");
+        }
+        else console.log("Unmuted");
+    })
+}
+
 async function call() {
     //create room and save config
     const db = firebase.firestore();
     connection = new RTCPeerConnection(RTCconfig);
-    registerPeerConnectionListeners(connection);
-    /* connection.addEventListener('connectionstatechange', (e) => onConnectionStateChange(e)) */
+    registerPeerConnectionListeners(connection, remoteStream);
     startMedia().then(async() => {
         const offer = await connection.createOffer();
-        await connection.setLocalDescription(offer);
         const room = {
             offer: {
                 type: offer.type,
@@ -60,28 +69,22 @@ async function call() {
             }
 
         }
-
         console.log(room)
-        roomDB = await db.collection('rooms').add(room);
-        roomID = roomDB.id;
-        console.log(roomID);
-
-        addIceCandidates();
-
-        /* connection.addEventListener('track', e => {
-            console.log(e.streams[0])
-            e.streams[0].getTracks().forEach(track => remoteStream.addTrack(track))
-        }) */
-        roomDB.onSnapshot(async(snapshot) => {
-            const data = snapshot.data();
-            if (!connection.currentRemoteDescription && data.answer) {
-                remoteID = data.answer.id;
-                console.log('Set remote description: ', data.answer);
-                const answer = new RTCSessionDescription(data.answer)
-                await connection.setRemoteDescription(answer);
-                await collectIceCandidates(roomDB, connection, localStorage.getItem("uid"), data.answer.id);
-
-            }
+        db.collection('rooms').add(room).then(async(temp)=>{
+            roomDB=temp;
+            roomID = roomDB.id;
+            console.log(roomID);
+            await connection.setLocalDescription(offer);
+            roomDB.onSnapshot(async(snapshot) => {
+                const data = snapshot.data();
+                if (data.answer) {
+                    remoteID = data.answer.id;
+                    console.log('Set remote description: ', data.answer);
+                    const answer = new RTCSessionDescription(data.answer)
+                    await connection.setRemoteDescription(answer);
+                    await collectRemoteIceCandidates(roomDB, connection, localStorage.getItem("uid"), data.answer.id);
+                }
+            })
         })
     })
 }
@@ -92,11 +95,11 @@ async function startMedia() {
         video: true,
         audio: true
     });
-    remoteStream = new MediaStream();
     console.log(localStream);
     localStream.getTracks().forEach(track => connection.addTrack(track, localStream));
     document.getElementById('localVideo').srcObject = localStream;
 }
+
 async function joinRoom(roomID) {
     const db = firebase.firestore();
     roomDB = await db.collection('rooms').doc(roomID);
@@ -106,27 +109,23 @@ async function joinRoom(roomID) {
             remoteID = offer.id;
             console.log(offer);
             connection = new RTCPeerConnection(RTCconfig);
-            registerPeerConnectionListeners(connection);
-            await startMedia();
-
+            registerPeerConnectionListeners(connection, remoteStream);
             await connection.setRemoteDescription(new RTCSessionDescription(offer));
-
-            const answer = await connection.createAnswer();
-
-
-            await connection.setLocalDescription(answer);
-            const room = {
-                answer: {
-                    type: answer.type,
-                    sdp: answer.sdp,
-                    id: localStorage.getItem("uid")
+            startMedia().then(async()=>{
+                const answer = await connection.createAnswer();
+//if aner eit 
+                await connection.setLocalDescription(answer);
+                const room = {
+                    answer: {
+                        type: answer.type,
+                        sdp: answer.sdp,
+                        id: localStorage.getItem("uid")
+                    }
                 }
-            }
-            console.log(room)
-            addIceCandidates();
-
-            await roomDB.set(room);
-            await collectIceCandidates(roomDB, connection, localStorage.getItem("uid"), offer.id);
+                console.log(room)
+                await roomDB.update(room);
+                await collectRemoteIceCandidates(roomDB, connection, localStorage.getItem("uid"), offer.id);
+            })
         }
     })
 }
@@ -143,7 +142,7 @@ function onConnectionStateChange() {
         console.log(participants[i])
         console.log(remoteID)
         if (participants[i]['id'] == remoteID) {
-            index = i;
+            index = i-1;
             break;
         }
     }
@@ -157,6 +156,7 @@ function onConnectionStateChange() {
         participants[index + 1] = participant;
     }
     document.getElementById('remoteVideo' + index).srcObject = remoteStream;
+    collectDetails(roomDB,remoteID);
     /*document.getElementById('remoteVideo' + index).playsInline = true;
     document.getElementById('remoteVideo' + index).muted = true; */
     console.log('Received and adding in remoteVideo' + index)
@@ -165,8 +165,14 @@ function onConnectionStateChange() {
 
 function toggleAudio() {
     const microphone = document.getElementsByClassName('fa-microphone');
-    if (microphone.length > 0) document.getElementsByClassName('fa-microphone')[0].className = "fa fa-microphone-slash";
-    else document.getElementsByClassName('fa-microphone-slash')[0].className = 'fa fa-microphone';
+    if (microphone.length > 0) {
+        document.getElementsByClassName('fa-microphone')[0].className = "fa fa-microphone-slash";
+        roomDB.collection(localStorage.getItem('uid')).doc("details").set({muted:true}, {merge:true});
+    }
+    else {
+        document.getElementsByClassName('fa-microphone-slash')[0].className = 'fa fa-microphone';
+        roomDB.collection(localStorage.getItem('uid')).doc("details").set({muted:false}, {merge:true});
+    }
 
     localStream.getAudioTracks().forEach(
         track => track.enabled = !track.enabled
@@ -187,6 +193,7 @@ function toggleVideo() {
         track => track.enabled = !track.enabled
     );
 }
+
 async function shareScreen(index) {
     try {
         if (!navigator.mediaDevices | typeof(navigator.mediaDevices.getDisplayMedia !== 'function')) {
@@ -199,35 +206,17 @@ async function shareScreen(index) {
     } catch (e) {
         removeRemoteVideo(index, participants);
     }
-
 }
-let iceCandidates = [];
 
 function onAddIceCandidate(event, candidatesCollection) {
     if (event.candidate) {
         const json = event.candidate.toJSON();
-        iceCandidates.push(json);
         console.log("iceCandidate", json);
+        roomDB.collection(localStorage.getItem('uid')).add(json);
     }
-    if (roomDB) addIceCandidates();
 }
 
-function addIceCandidates() {
-    console.log("Adding IceCandidatesto DB", iceCandidates.length)
-    const candidatesCollection = roomDB.collection(localStorage.getItem('uid'));
-    while (iceCandidates.length) {
-        candidatesCollection.add(iceCandidates.pop());
-    }
-    console.log("remaining", iceCandidates.length);
-}
-
-function dataChannel(){
-    sendChannel = localConnection.createDataChannel("sendChannel");
-sendChannel.onopen = handleSendChannelStatusChange;
-sendChannel.onclose = handleSendChannelStatusChange;
-}
-
-function registerPeerConnectionListeners(peerConnection) {
+function registerPeerConnectionListeners(peerConnection, remoteStream) {
     let index=null;
     peerConnection.addEventListener('icecandidate', (e) => onAddIceCandidate(e))
     peerConnection.addEventListener('icegatheringstatechange', () => {
@@ -242,7 +231,9 @@ function registerPeerConnectionListeners(peerConnection) {
                 break;
             case 'failed':
                 console.log('failed', index)
-                if(index) removeRemoteVideo(index, participants);
+                if(index!==null) removeRemoteVideo(index, participants);
+                break;
+            case 'disconnected':
                 break;
 
         }
@@ -252,7 +243,7 @@ function registerPeerConnectionListeners(peerConnection) {
     peerConnection.addEventListener('signalingstatechange', () => {
         switch (peerConnection.signalingState) {
             case "stable":
-                /* onConnectionStateChange(); */
+                break;
         }
         console.log(`Signaling state change: ${peerConnection.signalingState}`);
     });
