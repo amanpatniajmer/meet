@@ -44,14 +44,33 @@ async function collectRemoteIceCandidates(roomRef, peerConnection,
     })
 }
 
-async function collectDetails(roomRef, remoteName) {
+async function collectDetails(roomRef, remoteName, index) {
     console.log(remoteName)
     roomRef.collection(remoteName).doc("details").onSnapshot((snapshot) => {
-        if(snapshot.data() && snapshot.data().muted){
-            console.log("Muted");
-        }
-        else console.log("Unmuted");
+        setDetails(index,snapshot.data());
     })
+}
+
+function setDetails(index, details){
+    console.log(index)
+    if(details){
+        if(details.reaction){
+            document.getElementsByClassName('video')[index+1].querySelector('.sub-controls i:last-child').className=details.reaction;
+        }
+        else{
+            document.getElementsByClassName('video')[index+1].querySelector('.sub-controls i:last-child').className='';
+        }
+        if(details.muted){
+            document.getElementsByClassName('video')[index+1].querySelector('.sub-controls i:first-child').className='fa fa-microphone-slash';
+        }
+        else{
+            document.getElementsByClassName('video')[index+1].querySelector('.sub-controls i:first-child').className='';
+        }
+    }
+    else{
+        document.getElementsByClassName('video')[index+1].querySelector('.sub-controls i:last-child').className='';
+        document.getElementsByClassName('video')[index+1].querySelector('.sub-controls i:first-child').className='';
+    }
 }
 
 async function call() {
@@ -156,7 +175,7 @@ function onConnectionStateChange() {
         participants[index + 1] = participant;
     }
     document.getElementById('remoteVideo' + index).srcObject = remoteStream;
-    collectDetails(roomDB,remoteID);
+    collectDetails(roomDB,remoteID, index);
     /*document.getElementById('remoteVideo' + index).playsInline = true;
     document.getElementById('remoteVideo' + index).muted = true; */
     console.log('Received and adding in remoteVideo' + index)
@@ -192,6 +211,10 @@ function toggleVideo() {
     localStream.getVideoTracks().forEach(
         track => track.enabled = !track.enabled
     );
+}
+
+function toggleReaction(className){
+    roomDB.collection(localStorage.getItem('uid')).doc("details").set({reaction:className}, {merge:true});
 }
 
 async function shareScreen(index) {
