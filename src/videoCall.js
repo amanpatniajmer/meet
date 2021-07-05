@@ -183,13 +183,15 @@ function onConnectionStateChange() {
 }
 
 function toggleAudio() {
-    const microphone = document.getElementsByClassName('fa-microphone');
-    if (microphone.length > 0) {
-        document.getElementsByClassName('fa-microphone')[0].className = "fa fa-microphone-slash";
+    const microphone = document.querySelector('.video .fa-microphone');
+    if (microphone) {
+        microphone.className = "fa fa-microphone-slash";
+        document.querySelector('.video-controls .fa-microphone').className = "fa fa-microphone-slash";
         roomDB.collection(localStorage.getItem('uid')).doc("details").set({muted:true}, {merge:true});
     }
     else {
-        document.getElementsByClassName('fa-microphone-slash')[0].className = 'fa fa-microphone';
+        document.querySelector('.video .fa-microphone-slash').className = 'fa fa-microphone';
+        document.querySelector('.video-controls .fa-microphone-slash').className = "fa fa-microphone";
         roomDB.collection(localStorage.getItem('uid')).doc("details").set({muted:false}, {merge:true});
     }
 
@@ -214,6 +216,8 @@ function toggleVideo() {
 }
 
 function toggleReaction(className){
+    document.querySelector('.sub-controls i:last-child').className=className;
+    document.querySelector('.video-controls .dropdown i').className=className;
     roomDB.collection(localStorage.getItem('uid')).doc("details").set({reaction:className}, {merge:true});
 }
 
