@@ -134,6 +134,10 @@
         let roomID = window.location.search.substr(6, window.location.search.length - 1);
         document.onload = roomID? loadChat(roomID):fetchRooms();
         let rooms = [];
+        let participants=[];
+        let nickNames={};
+        nickNames[localStorage.getItem('uid')]=localStorage.getItem('name')
+        let contacts=[];
         async function fetchRooms() {
             const db = firebase.firestore();
             usersDB = db.collection('users').doc(localStorage.getItem('uid'))
@@ -189,12 +193,9 @@
 
         function addParticipants(){
             toggleVisibility('addParticipantsModal', 'block');
-            startLoading();
-            fetchContacts().then((contacts)=>{
-                console.log(contacts)
-                stopLoading();
-                showAddParticipants('addParticipantsList', contacts);
-            })
+            showAddParticipants('addParticipantsList', contacts.filter((contact)=>{
+                return !participants.find((participant)=>{return participant.id==contact.uid})
+            }));
         }
 
         function sendInvite(id){
@@ -206,7 +207,7 @@
             db.collection('rooms').doc(roomID).collection('participants')
             .add({
                 id:id,
-            }).then(()=>console.log('added'))
+            }).then(()=>showAlert("success", "Added participant", "fa-check"));
         }
 
         function stopLoading() {
@@ -218,10 +219,24 @@
             console.log('loading')
         }
         function loadChat(id) {
+            fetchContacts().then((tempContacts)=>{
+                contacts=tempContacts;
+                contacts.forEach((contact)=>nickNames[contact["uid"]]=contact["name"])
+                usersDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added" && change.doc.id!=="details") {
+                        const msg={...change.doc.data(), time:change.doc.data().time.toDate()};
+                        document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg));
+                    }
+                });
+                stopLoading();
+                scrollDown("chats");
+            })
+            });
             const msgs = [];
             const db = firebase.firestore();
             usersDB = db.collection('rooms').doc(id);
-                document.getElementsByClassName('tab')[0].innerHTML = `<h3>${id}</h3>
+                document.getElementsByClassName('tab')[0].innerHTML = `<h3>${localStorage.getItem('roomName')}</h3>
                 <div class="filters">
                     <button onclick="addParticipants()" class="btn-primary border-radius" id="addContact"><i class="fa fa-plus-circle"></i> Add Participant</button>
                 </div>
@@ -233,16 +248,12 @@
                 <button type="submit" style="margin:0"><i class="fa fa-send"></i></button>
             </form>`;
             document.getElementById('sendMsg').onsubmit=(e)=>sendMsg(e)
-
-            usersDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
-                snapshot.docChanges().forEach((change, i) => {
-                    if (change.type === "added" && change.doc.id!=="details") {
-                        const msg={...change.doc.data(), time:change.doc.data().time.toDate()};
-                        document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg));
+            usersDB.collection("participants").onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        participants.push(change.doc.data());
                     }
                 });
-                stopLoading();
-                scrollDown("chats");
             })
         }
         function sendMsg(e){
@@ -267,7 +278,7 @@
         function createMsg(msg) {
             return `<div class="message ${msg.from === localStorage.getItem('uid') ? 'local' : 'remote'}-message">
                     <div class="name">
-                        ${msg.from}
+                        ${nickNames[msg.from]}
                     </div>
                     <div class="msg">
                     ${msg.msg}
