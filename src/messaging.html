@@ -76,9 +76,34 @@
                 <div class="tab-heading">Messaging</div>
                 <div class="tab">
                     <input type="text" name="search" placeholder="Type a name" onkeyup="searchRooms(this.value)">
+                    <div class="filters">
+                        <button class="btn-primary border-radius" id="addContact"><i class="fa fa-plus-circle"></i> Create new Room</button>
+                    </div>
                     <div id="roomsList">
 
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="addParticipantsModal" class="modal">
+        <div class="modalBox border-radius">
+            <h1>Add Participants <button class="right-align btn-danger" onclick="toggleVisibility('addParticipantsModal', 'block');"><i
+                class="fa fa-close"></i></button></h1>
+            <div class="content">
+                <div id="addParticipantsList">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="showParticipantsModal" class="modal">
+        <div class="modalBox border-radius">
+            <h1>Participants <button class="right-align btn-danger" onclick="toggleVisibility('showParticipantsModal', 'block');"><i
+                class="fa fa-close"></i></button></h1>
+            <div class="content">
+                <div id="participantsList">
+
                 </div>
             </div>
         </div>
@@ -104,8 +129,18 @@
                     console.log(doc.data()['rooms']);
                     rooms=doc.data()['rooms'];
                     updateRoomsList(doc.data()['rooms'], "roomsList");
-                    stopLoading();
                 }
+                stopLoading();
+            })
+        }
+
+        function addParticipants(){
+            toggleVisibility('addParticipantsModal', 'block');
+            startLoading();
+            fetchContacts().then((contacts)=>{
+                console.log(contacts)
+                stopLoading();
+                showAddParticipants('addParticipantsList', contacts);
             })
         }
 
@@ -120,8 +155,11 @@
         function loadChat(id) {
             const msgs = [];
             const db = firebase.firestore();
-            usersDB = db.collection('users').doc(localStorage.getItem('uid'));
+            usersDB = db.collection('rooms').doc(localStorage.getItem('remoteChat'));
                 document.getElementsByClassName('tab')[0].innerHTML = `<h3>${id}</h3>
+                <div class="filters">
+                    <button onclick="addParticipants()" class="btn-primary border-radius" id="addContact"><i class="fa fa-plus-circle"></i> Add Participant</button>
+                </div>
             <div id="chats" class="chats">
                  
             </div>
@@ -131,7 +169,7 @@
             </form>`;
             document.getElementById('sendMsg').onsubmit=(e)=>sendMsg(e)
 
-            usersDB.collection(localStorage.getItem('remoteChat')).orderBy('time').onSnapshot((snapshot) => {
+            usersDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
                 snapshot.docChanges().forEach((change, i) => {
                     if (change.type === "added" && change.doc.id!=="details") {
                         const msg={...change.doc.data(), time:change.doc.data().time.toDate()};

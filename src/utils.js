@@ -100,3 +100,16 @@ function scrollDown(id){
     let element=document.getElementById(id);
     element.scrollTo(0,element.scrollHeight)
 }
+
+async function fetchContacts(){
+    const db=firebase.firestore();
+    let contacts=[];
+    usersDB = db.collection('users').doc(localStorage.getItem('uid'));
+    return usersDB.collection('contacts').get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            contacts.push({...doc.data(), id:doc.id});
+        });
+        stopLoading();
+        return contacts;
+    }).catch((error)=>console.log(error));
+}

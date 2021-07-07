@@ -137,7 +137,7 @@
                 });
                 console.log(contacts)
                 updateContactsList(contacts, 'contactsList');
-                setTimeout(stopLoading, 1);
+                stopLoading()
             }).catch((error)=>console.log(error));
         }
 
@@ -164,7 +164,7 @@
                 showAlert("success", "Contact Saved", "fa-check");
                 contacts.push({...newContact, id:res.id});
                 updateContactsList(contacts, 'contactsList');
-                setTimeout(stopLoading, 1);
+                stopLoading()
             })
             .catch((err)=>console.log(err));
             addContactForm.reset();
@@ -198,7 +198,7 @@
             .set(newContact)
             .then((res)=>{
                 showAlert("success", "Successfully edited contact", "fa-check");
-                setTimeout(stopLoading, 1);
+                stopLoading()
             })
             .catch((err)=>console.log(err));
             contacts[editIndex] = newContact;
@@ -215,7 +215,7 @@
             .delete()
             .then(()=>{
                 showAlert("success", "Successfully Deleted!", "fa-check")
-                setTimeout(stopLoading, 1);
+                stopLoading()
             })
             .catch((err)=>console.log(err));
             contacts.splice(index, 1);
