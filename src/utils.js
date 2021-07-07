@@ -87,6 +87,11 @@ function listenAuthChange(){
             localStorage.setItem('name', user.displayName);
             localStorage.setItem('email', user.email);
             localStorage.setItem('uid', user.uid);
+            const db=firebase.firestore();
+            db.collection('users').doc(user.uid).set({
+                name:user.displayName,
+                email:user.email,
+            });
             if(location.href.includes('/login.html'))location.href="/index.html";
         } else {
             console.log('Logged out')

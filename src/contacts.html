@@ -154,20 +154,43 @@
         addContactForm.onsubmit = function(e) {
             e.preventDefault();
             startLoading();
-            const newContact = formToJSON(e.target);
-
-            const db=firebase.firestore();
-            usersDB = db.collection('users').doc(localStorage.getItem('uid'));
-            usersDB.collection("contacts")
-            .add(newContact)
-            .then((res)=>{
-                showAlert("success", "Contact Saved", "fa-check");
-                contacts.push({...newContact, id:res.id});
-                updateContactsList(contacts, 'contactsList');
+            let newContact = formToJSON(e.target);
+            if(newContact.email===localStorage.getItem('email')){
+                showAlert("danger","You cannot add yourself","fa-close")
                 stopLoading()
+                return;
+            }
+            for(let i=0;i<contacts.length;i++){
+                if(contacts[i].email===newContact.email){
+                    showAlert("danger","Contact already exists","fa-close")
+                    stopLoading()
+                    return;
+                }
+            }
+            const db=firebase.firestore();
+            db.collection('users').where("email","==", newContact.email).get()
+            .then((querySnapshot)=>{
+                if(querySnapshot.size!=1){
+                    showAlert("danger","User does not exist","fa-close")
+                    stopLoading()
+                    return;
+                }
+                querySnapshot.forEach((doc)=>{
+                    newContact={...newContact, id:doc.id}
+                })
+                console.log(newContact);
+                usersDB = db.collection('users').doc(localStorage.getItem('uid'));
+                usersDB.collection("contacts")
+                .add({...newContact, id:querySnapshot[0].data()})
+                .then((res)=>{
+                    showAlert("success", "Contact Saved", "fa-check");
+                    contacts.push({...newContact, id:res.id});
+                    updateContactsList(contacts, 'contactsList');
+                    stopLoading()
+                })
+                .catch((err)=>console.log(err));
+                addContactForm.reset();
             })
-            .catch((err)=>console.log(err));
-            addContactForm.reset();
         }
         document.getElementById('addContactClose').onclick = () => toggleVisibility('addContactModal', 'block');
         let newContactBtn = document.getElementById('addContact');

@@ -52,7 +52,7 @@ function updateParticipants(participants) {
 function updateRoomsList(rooms, id) {
     let contentAll = "";
     for (let i = 0; i < rooms.length; i++) {
-        let content = "<div class='contact-card' style='cursor:pointer' onclick=\"setRemoteChat('"+rooms[i].id+"')\">\
+        let content = "<div class='contact-card' style='cursor:pointer' onclick=\"setRemoteChat('"+rooms[i].id+"', '"+rooms[i].name+"')\">\
                     <div class='upper'>\
                     <div class='avatar' style=\"background-color:" +
             getAvatarColor(rooms[i].id) +

@@ -77,12 +77,25 @@
                 <div class="tab">
                     <input type="text" name="search" placeholder="Type a name" onkeyup="searchRooms(this.value)">
                     <div class="filters">
-                        <button class="btn-primary border-radius" id="addContact"><i class="fa fa-plus-circle"></i> Create new Room</button>
+                        <button class="btn-primary border-radius" id="addContact" onclick="addRoom()"><i class="fa fa-plus-circle"></i> Create new Room</button>
                     </div>
                     <div id="roomsList">
 
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div id="addRoomModal" class="modal">
+        <div class="modalBox border-radius">
+            <h1>Add new Room <button class="right-align btn-danger" id="addRoomClose"><i class="fa fa-close"></i></button></h1>
+            <div class="content">
+                <form id="addRoomForm">
+                    <label>Enter room name:</label>
+                    <input type="text" name="name" />
+                    <div class="text-center"><button type="submit" class="btn-success">Add <i
+                                class="fa fa-plus-circle"></i></button></div>
+                </form>
             </div>
         </div>
     </div>
@@ -123,15 +136,55 @@
         let rooms = [];
         async function fetchRooms() {
             const db = firebase.firestore();
-            usersDB = db.collection('users').doc(localStorage.getItem('uid'));
-            usersDB.get().then((doc)=>{
-                if(doc.exists) {
-                    console.log(doc.data()['rooms']);
-                    rooms=doc.data()['rooms'];
-                    updateRoomsList(doc.data()['rooms'], "roomsList");
-                }
+            usersDB = db.collection('users').doc(localStorage.getItem('uid'))
+            .collection('rooms').onSnapshot((snapshot)=>{
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        rooms.push(change.doc.data())
+                        console.log(change.doc.data())
+                    }
+                })
+                updateRoomsList(rooms, "roomsList");
                 stopLoading();
             })
+        }
+
+        let addRoomForm = document.getElementById('addRoomForm');
+        addRoomForm.onsubmit = function(e) {
+            e.preventDefault();
+            startLoading();
+            const newRoom = formToJSON(e.target);
+            const db=firebase.firestore();
+            db.collection('users').doc(localStorage.getItem('uid'));
+            db.collection("rooms").add(newRoom).then((room)=>{
+                console.log(room.id);
+                console.log(newRoom)
+                room.collection("participants").add({id:localStorage.getItem('uid')}).then(()=>{
+                    console.log('added to')
+                })
+                db.collection("users").doc(localStorage.getItem('uid')).collection('rooms').add({
+                    id:room.id,
+                    name:newRoom.name
+                })
+                stopLoading();
+            })
+
+            /* usersDB.collection("rooms") */
+
+            /* .add(newContact)
+            .then((res)=>{
+                showAlert("success", "Contact Saved", "fa-check");
+                contacts.push({...newContact, id:res.id});
+                updateContactsList(contacts, 'contactsList');
+                stopLoading()
+            })
+            .catch((err)=>console.log(err)); */
+            addRoomForm.reset();
+        }
+        document.getElementById('addRoomClose').onclick = () => toggleVisibility('addRoomModal', 'block');
+
+        function addRoom(){
+            toggleVisibility('addRoomModal', 'block');
         }
 
         function addParticipants(){
@@ -142,6 +195,18 @@
                 stopLoading();
                 showAddParticipants('addParticipantsList', contacts);
             })
+        }
+
+        function sendInvite(id){
+            const db = firebase.firestore();
+            db.collection('users').doc(id).collection('rooms').add({
+                id:roomID,
+                name:localStorage.getItem("roomName")
+            });
+            db.collection('rooms').doc(roomID).collection('participants')
+            .add({
+                id:id,
+            }).then(()=>console.log('added'))
         }
 
         function stopLoading() {
@@ -155,7 +220,7 @@
         function loadChat(id) {
             const msgs = [];
             const db = firebase.firestore();
-            usersDB = db.collection('rooms').doc(localStorage.getItem('remoteChat'));
+            usersDB = db.collection('rooms').doc(id);
                 document.getElementsByClassName('tab')[0].innerHTML = `<h3>${id}</h3>
                 <div class="filters">
                     <button onclick="addParticipants()" class="btn-primary border-radius" id="addContact"><i class="fa fa-plus-circle"></i> Add Participant</button>
@@ -190,8 +255,8 @@
             e.target.reset();
         }
 
-        function setRemoteChat(remoteChat) {
-            localStorage.setItem("remoteChat", remoteChat);
+        function setRemoteChat(remoteChat, roomName) {
+            localStorage.setItem("roomName", roomName);
             location.href='messaging.html?room='+remoteChat;
         }
 
