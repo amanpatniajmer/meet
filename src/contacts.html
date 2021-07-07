@@ -176,12 +176,12 @@
                     return;
                 }
                 querySnapshot.forEach((doc)=>{
-                    newContact={...newContact, id:doc.id}
+                    newContact={...newContact, uid:doc.id}
                 })
                 console.log(newContact);
                 usersDB = db.collection('users').doc(localStorage.getItem('uid'));
                 usersDB.collection("contacts")
-                .add({...newContact, id:querySnapshot[0].data()})
+                .add(newContact)
                 .then((res)=>{
                     showAlert("success", "Contact Saved", "fa-check");
                     contacts.push({...newContact, id:res.id});

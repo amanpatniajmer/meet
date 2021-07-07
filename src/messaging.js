@@ -13,7 +13,7 @@ function showAddParticipants(id, contacts) {
                 </div>\
                 <div>\
                     <button onclick='sendInvite(\"" +
-            contacts[i].id +
+            contacts[i].uid +
             "\")'><i class='fa fa-plus-circle'></i> Add</button>\
                </div>\
             </div>\

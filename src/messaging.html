@@ -249,8 +249,8 @@
             e.preventDefault();
             const msg={from:localStorage.getItem('uid'), msg:e.target["msg"].value, time:new Date()};
             const db = firebase.firestore();
-            usersDB = db.collection('users').doc(localStorage.getItem('uid'));
-            usersDB.collection(localStorage.getItem('remoteChat')).add(msg)
+            usersDB = db.collection('rooms').doc(roomID);
+            usersDB.collection('chats').add(msg)
             /* document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg)); */
             e.target.reset();
         }
