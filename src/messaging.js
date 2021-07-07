@@ -1,15 +1,15 @@
-function updateContactsList(contacts, id) {
+function updateRoomsList(rooms, id) {
     let contentAll = "";
-    for (let i = 0; i < contacts.length; i++) {
-        let content = "<div class='contact-card' style='cursor:pointer' onclick=\"setRemoteChat('"+contacts[i].id+"')\">\
+    for (let i = 0; i < rooms.length; i++) {
+        let content = "<div class='contact-card' style='cursor:pointer' onclick=\"setRemoteChat('"+rooms[i].id+"')\">\
                     <div class='upper'>\
                     <div class='avatar' style=\"background-color:" +
-            getAvatarColor(contacts[i].name) +
+            getAvatarColor(rooms[i].id) +
             "\">" +
-            getAvatar(contacts[i].name) +
+            getAvatar(rooms[i].name) +
             "</div>\
                             <div class='name'>" +
-            contacts[i].name +
+            rooms[i].name +
             "</div>\
                         </div>\
                         <div class='lower'>\
