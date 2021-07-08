@@ -26,7 +26,7 @@ const RTCconfig = {
             'stun:stun2.l.google.com:19302',
         ]
     }, ],
-    iceCandidatePoolSize: 10
+    iceCandidatePoolSize: 20
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -55,7 +55,7 @@ function sendMessage(msg, to){
         from:localUuid,
         ...msg,
         to:to,
-        time:new Date()
+        time: new Date()
     })
 }
 init();
@@ -80,23 +80,26 @@ function setUpPeer(peerUuid, initCall = false) {
 function checkPeerDisconnect(event, peerUuid) {
     let state = connections[peerUuid].pc.iceConnectionState;
     console.log(`connection with peer ${peerUuid} ${state}`);
-    if (state === "failed" || state === "closed") {
+    if (state === "failed" || state === "closed" || connections[peerUuid].pc.connectionState==='failed') {
         delete connections[peerUuid];
         removeVideo(peerUuid)
+        window.location.reload();
         /* updateLayout(); */
     }
 }
 function gotRemoteStream(event, peerUuid, screenShare=false){
     console.log(`got remote stream, peer ${peerUuid}`);
+    console.log(event.streams[0])
     //assign stream to new HTML video element
+    
     let video = document.getElementById(peerUuid);
     if(video==null){
         createVideo(connections[peerUuid].name, screenShare, peerUuid)
         video=document.getElementById(peerUuid);
     }
-    video.srcObject = event.streams[0];
-    /* e.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
-        console.log('Receiving') */
+    /* event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+    video.srcObject = remoteStream; */
+    video.srcObject=event.streams[0]
 
     /* updateLayout(); */
 }
@@ -105,7 +108,7 @@ function errorHandler(error){
     console.log(error)
 }
 function gotMessageFromServer(signal) {
-    /* console.log(signal) */
+    console.log(signal)
     const signalLength=Object.keys(signal).length;
     let peerUuid = signal.from;
    
@@ -357,14 +360,14 @@ function gotIceCandidate(event, peerUuid) {
 
 function registerPeerConnectionListeners(peerConnection, remoteStream) {
     let index=null;
-    peerConnection.addEventListener('icecandidate', (e) => gotIceCandidate(e))
+    /* peerConnection.addEventListener('icecandidate', (e) => gotIceCandidate(e)) */
     peerConnection.addEventListener('icegatheringstatechange', () => {
         console.log(
             `ICE gathering state changed: ${peerConnection.iceGatheringState}`);
     });
 
     peerConnection.addEventListener('connectionstatechange', () => {
-        switch (peerConnection.connectionState) {
+        /* switch (peerConnection.connectionState) {
             case 'connected':
                 index=onConnectionStateChange();
                 break;
@@ -375,29 +378,29 @@ function registerPeerConnectionListeners(peerConnection, remoteStream) {
             case 'disconnected':
                 break;
 
-        }
+        } */
         console.log(`Connection state change: ${peerConnection.connectionState}`, peerConnection);
     });
 
     peerConnection.addEventListener('signalingstatechange', () => {
-        switch (peerConnection.signalingState) {
+        /* switch (peerConnection.signalingState) {
             case "stable":
                 break;
-        }
+        } */
         console.log(`Signaling state change: ${peerConnection.signalingState}`);
     });
 
     peerConnection.addEventListener('iceconnectionstatechange ', () => {
-        switch (peerConnection.iceConnectionState) {
+        /* switch (peerConnection.iceConnectionState) {
             case 'complete':
                 break;
 
-        }
+        } */
         console.log(
             `ICE connection state change: ${peerConnection.iceConnectionState}`);
     });
-    peerConnection.addEventListener('track', e => {
+    /* peerConnection.addEventListener('track', e => {
         e.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
         console.log('Receiving')
-    })
+    }) */
 }
