@@ -61,12 +61,12 @@ function sendMessage(msg, to){
 init();
 
 async function createdDescription(description, peerUuid){
-    await connections[peerUuid].setLocalDescription(description);
-    console.log(description)
-    sendMessage({sdp: description}, peerUuid)
+    await connections[peerUuid].pc.setLocalDescription(description);
+    
+    sendMessage({sdp: {type:description.type, sdp:description.sdp}}, peerUuid)
 }
 function setUpPeer(peerUuid, initCall = false) {
-    connections[peerUuid] = {'name':nickNames[peerUuid], 'pc': new RTCPeerConnection(RTCConfig) };
+    connections[peerUuid] = {'name':nickNames[peerUuid], 'pc': new RTCPeerConnection(RTCconfig) };
     connections[peerUuid].pc.onicecandidate = event => gotIceCandidate(event, peerUuid);
     connections[peerUuid].pc.ontrack = event => gotRemoteStream(event, peerUuid);
     connections[peerUuid].pc.oniceconnectionstatechange = event => checkPeerDisconnect(event, peerUuid);
@@ -78,10 +78,10 @@ function setUpPeer(peerUuid, initCall = false) {
   }
 
 function checkPeerDisconnect(event, peerUuid) {
-    let state = peerConnections[peerUuid].pc.iceConnectionState;
+    let state = connections[peerUuid].pc.iceConnectionState;
     console.log(`connection with peer ${peerUuid} ${state}`);
     if (state === "failed" || state === "closed" || state === "disconnected") {
-        delete peerConnections[peerUuid];
+        delete connections[peerUuid];
         document.getElementById(peerUuid).remove();
         /* updateLayout(); */
     }
@@ -89,26 +89,35 @@ function checkPeerDisconnect(event, peerUuid) {
 function gotRemoteStream(event, peerUuid, screenShare=false){
     console.log(`got remote stream, peer ${peerUuid}`);
     //assign stream to new HTML video element
-    createVideo(connections[peerUuid].name, screenShare, peerUuid)
     let video = document.getElementById(peerUuid);
+    if(video==null){
+        createVideo(connections[peerUuid].name, screenShare, peerUuid)
+        video=document.getElementById(peerUuid);
+    }
     video.srcObject = event.streams[0];
     /* e.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
         console.log('Receiving') */
 
     /* updateLayout(); */
 }
+
+function errorHandler(error){
+    console.log(error)
+}
 function gotMessageFromServer(signal) {
+    /* console.log(signal) */
+    const signalLength=Object.keys(signal).length;
     let peerUuid = signal.from;
    
     // Ignore messages that are not for us or from ourselves
     if (peerUuid == localUuid || (signal.to != localUuid && signal.to != 'all')) return;
    
-    if (signal.dest == 'all') {
+    if (signalLength==3  && signal.to == 'all') {
       // set up peer connection object for a newcomer peer
       setUpPeer(peerUuid, false);
       sendMessage({}, peerUuid);
    
-    } else if (signal.to == localUuid) {
+    } else if (signalLength==3 && signal.to == localUuid) {
       // initiate call if we are the newcomer peer
       setUpPeer(peerUuid, true);
    
@@ -118,10 +127,11 @@ function gotMessageFromServer(signal) {
         if (signal.sdp.type == 'offer') {
           connections[peerUuid].pc.createAnswer().then(description => createdDescription(description, peerUuid)).catch(errorHandler);
         }
-      }).catch((error)=>console.log(error));
+      }).catch(errorHandler);
    
     } else if (signal.ice) {
-      connections[peerUuid].pc.addIceCandidate(new RTCIceCandidate(signal.ice)).catch((error)=>console.log(error));
+        console.log('RemoteIce Candidate', signal.ice, typeof signal.ice)
+      connections[peerUuid].pc.addIceCandidate(new RTCIceCandidate(signal.ice)).catch(errorHandler);
     }
   }
 
@@ -215,7 +225,7 @@ async function startMedia() {
             localStream = stream;
             document.getElementById('localVideo').srcObject = localStream;
             console.log(localStream)
-        }).catch((err)=>console.log(err));
+        }).catch(errorHandler);
     }
     else{
         alert('Your browser does not support getUserMedia API');
@@ -340,7 +350,7 @@ async function shareScreen(index) {
 
 function gotIceCandidate(event, peerUuid) {
     if (event.candidate) {
-        sendMessage({'ice': event.candidate}, peerUuid);
+        sendMessage({'ice': event.candidate.toJSON()}, peerUuid);
         console.log("iceCandidate", event.candidate);
     }
 }

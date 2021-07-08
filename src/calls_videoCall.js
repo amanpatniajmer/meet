@@ -54,6 +54,7 @@ function createVideo(name, screen, id) {
     let i = videos.children.length - 1;
     if (i >= 3) return -1;
     let newVideo = document.createElement('div');
+    newVideo.id=id+'video';
     newVideo.className = 'video';
     newVideo.innerHTML = "<video id='" + id + "' autoplay playsinline></video>\
     <div class='sub-controls'>\
@@ -66,5 +67,5 @@ function createVideo(name, screen, id) {
 }
 
 function removeRemoteVideo(id) {
-    document.getElementById(id).remove();
+    document.getElementById(id+'video').remove();
 }
