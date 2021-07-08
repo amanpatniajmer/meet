@@ -66,6 +66,6 @@ function createVideo(name, screen, id) {
     return i;
 }
 
-function removeRemoteVideo(id) {
+function removeVideo(id) {
     document.getElementById(id+'video').remove();
 }

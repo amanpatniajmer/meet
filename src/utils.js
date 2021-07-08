@@ -123,7 +123,6 @@ async function fetchContacts(){
         querySnapshot.forEach((doc) => {
             contacts.push({...doc.data(), id:doc.id});
         });
-        stopLoading();
         return contacts;
     }).catch((error)=>console.log(error));
 }

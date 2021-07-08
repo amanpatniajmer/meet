@@ -126,20 +126,12 @@
     <script src="./calls_contacts.js"></script>
     <script>
         startLoading();
-        document.onload=fetchContacts();
         let contacts = [];
-        async function fetchContacts(){
-            const db=firebase.firestore();
-            usersDB = db.collection('users').doc(localStorage.getItem('uid'));
-            usersDB.collection('contacts').get().then(async(querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    contacts.push({...doc.data(), id:doc.id});
-                });
-                console.log(contacts)
-                updateContactsList(contacts, 'contactsList');
-                stopLoading()
-            }).catch((error)=>console.log(error));
-        }
+        document.onload=fetchContacts().then((tcontacts)=>{
+            contacts=tcontacts;
+            updateContactsList(contacts, 'contactsList')
+            stopLoading();
+        })
 
         let addContactForm = document.getElementById('addContactForm');
         addContactForm.onsubmit = function(e) {

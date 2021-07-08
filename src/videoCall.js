@@ -80,9 +80,9 @@ function setUpPeer(peerUuid, initCall = false) {
 function checkPeerDisconnect(event, peerUuid) {
     let state = connections[peerUuid].pc.iceConnectionState;
     console.log(`connection with peer ${peerUuid} ${state}`);
-    if (state === "failed" || state === "closed" || state === "disconnected") {
+    if (state === "failed" || state === "closed") {
         delete connections[peerUuid];
-        document.getElementById(peerUuid).remove();
+        removeVideo(peerUuid)
         /* updateLayout(); */
     }
 }

@@ -209,17 +209,9 @@
                 id:id,
             }).then(()=>showAlert("success", "Added participant", "fa-check"));
         }
-
-        function stopLoading() {
-            document.getElementById('loading').style.display = "none";
-        }
-
-        function startLoading() {
-            document.getElementById('loading').style.display = "flex";
-            console.log('loading')
-        }
         function loadChat(id) {
             fetchContacts().then((tempContacts)=>{
+                startLoading();
                 contacts=tempContacts;
                 contacts.forEach((contact)=>nickNames[contact["uid"]]=contact["name"])
                 usersDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
