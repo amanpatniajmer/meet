@@ -238,6 +238,7 @@
             usersDB = db.collection('rooms').doc(id);
                 document.getElementsByClassName('tab')[0].innerHTML = `<h3>${localStorage.getItem('roomName')}</h3>
                 <div class="filters">
+                    <button onclick="setCallee(roomID)" class="btn border-radius" id="addContact"><i class="fa fa-video-camera"></i></button>
                     <button onclick="addParticipants()" class="btn-primary border-radius" id="addContact"><i class="fa fa-plus-circle"></i> Add Participant</button>
                 </div>
             <div id="chats" class="chats">
@@ -278,7 +279,7 @@
         function createMsg(msg) {
             return `<div class="message ${msg.from === localStorage.getItem('uid') ? 'local' : 'remote'}-message">
                     <div class="name">
-                        ${nickNames[msg.from]}
+                        ${nickNames[msg.from]===undefined ? msg.email :nickNames[msg.from]}
                     </div>
                     <div class="msg">
                     ${msg.msg}

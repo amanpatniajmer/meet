@@ -1,12 +1,16 @@
 const callee = localStorage.getItem("callee");
 let roomID = window.location.search.substr(6, window.location.search.length - 1);
 console.log(roomID);
+const localUuid=localStorage.getItem('uid');
 let connection = null;
 let localStream = null;
 let remoteStream = new MediaStream();
 let remoteID = null;
-let roomDB = null;
-var firebaseConfig = {
+let nickNames={};
+let contacts=[];
+let participants=[];
+let connections={};
+const firebaseConfig = {
     apiKey: "AIzaSyAoThvyDnMKikCSZTzd00zp0_03lekKgGs",
     authDomain: "ms-teams-clone-3687d.firebaseapp.com",
     projectId: "ms-teams-clone-3687d",
@@ -15,9 +19,6 @@ var firebaseConfig = {
     appId: "1:35666250286:web:b24086e604e7338629adbf",
     measurementId: "G-0DKCPEVW7W"
 };
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-
 const RTCconfig = {
     iceServers: [{
         urls: [
@@ -27,6 +28,102 @@ const RTCconfig = {
     }, ],
     iceCandidatePoolSize: 10
 };
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+const roomDB=db.collection('rooms').doc(roomID);
+let lastMessageID=null;
+
+function init(){
+    Promise.all([fetchContacts(), fetchParticipants(roomID), startMedia()]).then((values)=>{
+        console.log('done')
+        contacts=values[0];
+        contacts.forEach((contact)=>nickNames[contact['uid']]=(contact['name']===undefined?contact['email']:contact['name']))
+        participants=values[1];
+        roomDB.collection('messages').where("time",">=", new Date()).onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change)=>{
+                if(change.type=='added'){
+                    gotMessageFromServer(change.doc.data())
+                }
+            })
+        })
+        sendMessage({}, 'all')
+    })
+}
+function sendMessage(msg, to){
+    roomDB.collection('messages').add({
+        from:localUuid,
+        ...msg,
+        to:to,
+        time:new Date()
+    })
+}
+init();
+
+async function createdDescription(description, peerUuid){
+    await connections[peerUuid].setLocalDescription(description);
+    console.log(description)
+    sendMessage({sdp: description}, peerUuid)
+}
+function setUpPeer(peerUuid, initCall = false) {
+    connections[peerUuid] = {'name':nickNames[peerUuid], 'pc': new RTCPeerConnection(RTCConfig) };
+    connections[peerUuid].pc.onicecandidate = event => gotIceCandidate(event, peerUuid);
+    connections[peerUuid].pc.ontrack = event => gotRemoteStream(event, peerUuid);
+    connections[peerUuid].pc.oniceconnectionstatechange = event => checkPeerDisconnect(event, peerUuid);
+    connections[peerUuid].pc.addStream(localStream);
+   
+    if (initCall) {
+      connections[peerUuid].pc.createOffer().then(description => createdDescription(description, peerUuid)).catch(errorHandler);
+    }
+  }
+
+function checkPeerDisconnect(event, peerUuid) {
+    let state = peerConnections[peerUuid].pc.iceConnectionState;
+    console.log(`connection with peer ${peerUuid} ${state}`);
+    if (state === "failed" || state === "closed" || state === "disconnected") {
+        delete peerConnections[peerUuid];
+        document.getElementById(peerUuid).remove();
+        /* updateLayout(); */
+    }
+}
+function gotRemoteStream(event, peerUuid, screenShare=false){
+    console.log(`got remote stream, peer ${peerUuid}`);
+    //assign stream to new HTML video element
+    createVideo(connections[peerUuid].name, screenShare, peerUuid)
+    let video = document.getElementById(peerUuid);
+    video.srcObject = event.streams[0];
+    /* e.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+        console.log('Receiving') */
+
+    /* updateLayout(); */
+}
+function gotMessageFromServer(signal) {
+    let peerUuid = signal.from;
+   
+    // Ignore messages that are not for us or from ourselves
+    if (peerUuid == localUuid || (signal.to != localUuid && signal.to != 'all')) return;
+   
+    if (signal.dest == 'all') {
+      // set up peer connection object for a newcomer peer
+      setUpPeer(peerUuid, false);
+      sendMessage({}, peerUuid);
+   
+    } else if (signal.to == localUuid) {
+      // initiate call if we are the newcomer peer
+      setUpPeer(peerUuid, true);
+   
+    } else if (signal.sdp) {
+      connections[peerUuid].pc.setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(function () {
+        // Only create answers in response to offers
+        if (signal.sdp.type == 'offer') {
+          connections[peerUuid].pc.createAnswer().then(description => createdDescription(description, peerUuid)).catch(errorHandler);
+        }
+      }).catch((error)=>console.log(error));
+   
+    } else if (signal.ice) {
+      connections[peerUuid].pc.addIceCandidate(new RTCIceCandidate(signal.ice)).catch((error)=>console.log(error));
+    }
+  }
 
 async function collectRemoteIceCandidates(roomRef, peerConnection,
     localName, remoteName) {
@@ -110,13 +207,19 @@ async function call() {
 
 //start camera and microphone and inject in localVideo
 async function startMedia() {
-    localStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true
-    });
-    console.log(localStream);
-    localStream.getTracks().forEach(track => connection.addTrack(track, localStream));
-    document.getElementById('localVideo').srcObject = localStream;
+    if (navigator.mediaDevices.getUserMedia){
+        return navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        }).then((stream)=>{
+            localStream = stream;
+            document.getElementById('localVideo').srcObject = localStream;
+            console.log(localStream)
+        }).catch((err)=>console.log(err));
+    }
+    else{
+        alert('Your browser does not support getUserMedia API');
+    }
 }
 
 async function joinRoom(roomID) {
@@ -148,11 +251,11 @@ async function joinRoom(roomID) {
         }
     })
 }
-if (roomID === '') {
+/* if (roomID === '') {
     call();
 } else {
     joinRoom(roomID);
-}
+} */
 
 function onConnectionStateChange() {
     console.log(connection.connectionState);
@@ -187,12 +290,12 @@ function toggleAudio() {
     if (microphone) {
         microphone.className = "fa fa-microphone-slash";
         document.querySelector('.video-controls .fa-microphone').className = "fa fa-microphone-slash";
-        roomDB.collection(localStorage.getItem('uid')).doc("details").set({muted:true}, {merge:true});
+        roomDB.collection(localUuid).doc("details").set({muted:true}, {merge:true});
     }
     else {
         document.querySelector('.video .fa-microphone-slash').className = 'fa fa-microphone';
         document.querySelector('.video-controls .fa-microphone-slash').className = "fa fa-microphone";
-        roomDB.collection(localStorage.getItem('uid')).doc("details").set({muted:false}, {merge:true});
+        roomDB.collection(localUuid).doc("details").set({muted:false}, {merge:true});
     }
 
     localStream.getAudioTracks().forEach(
@@ -218,7 +321,7 @@ function toggleVideo() {
 function toggleReaction(className){
     document.querySelector('.sub-controls i:last-child').className=className;
     document.querySelector('.video-controls .dropdown i').className=className;
-    roomDB.collection(localStorage.getItem('uid')).doc("details").set({reaction:className}, {merge:true});
+    roomDB.collection(localUuid).doc("details").set({reaction:className}, {merge:true});
 }
 
 async function shareScreen(index) {
@@ -235,17 +338,16 @@ async function shareScreen(index) {
     }
 }
 
-function onAddIceCandidate(event, candidatesCollection) {
+function gotIceCandidate(event, peerUuid) {
     if (event.candidate) {
-        const json = event.candidate.toJSON();
-        console.log("iceCandidate", json);
-        roomDB.collection(localStorage.getItem('uid')).add(json);
+        sendMessage({'ice': event.candidate}, peerUuid);
+        console.log("iceCandidate", event.candidate);
     }
 }
 
 function registerPeerConnectionListeners(peerConnection, remoteStream) {
     let index=null;
-    peerConnection.addEventListener('icecandidate', (e) => onAddIceCandidate(e))
+    peerConnection.addEventListener('icecandidate', (e) => gotIceCandidate(e))
     peerConnection.addEventListener('icegatheringstatechange', () => {
         console.log(
             `ICE gathering state changed: ${peerConnection.iceGatheringState}`);

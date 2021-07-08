@@ -141,15 +141,6 @@
             }).catch((error)=>console.log(error));
         }
 
-        function stopLoading() {
-            document.getElementById('loading').style.display = "none";
-        }
-
-        function startLoading() {
-            document.getElementById('loading').style.display = "flex";
-            console.log('loading')
-        }
-
         let addContactForm = document.getElementById('addContactForm');
         addContactForm.onsubmit = function(e) {
             e.preventDefault();
@@ -243,11 +234,6 @@
             .catch((err)=>console.log(err));
             contacts.splice(index, 1);
             updateContactsList(contacts, 'contactsList');
-        }
-
-        function setCallee(callee) {
-            localStorage.setItem("callee", callee)
-            window.location.href = "./videoCall.html";
         }
 
         function searchContacts(val) {

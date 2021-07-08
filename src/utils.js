@@ -1,3 +1,12 @@
+function stopLoading() {
+    document.getElementById('loading').style.display = "none";
+}
+
+function startLoading() {
+    document.getElementById('loading').style.display = "flex";
+    console.log('loading')
+}
+
 function showAlert(type, msg, iconClass) {
     let alert = document.getElementById('alert')
     alert.children[0].innerHTML = msg;
@@ -117,4 +126,27 @@ async function fetchContacts(){
         stopLoading();
         return contacts;
     }).catch((error)=>console.log(error));
+}
+
+async function fetchParticipants(roomID){
+    const db=firebase.firestore();
+    let participants=[];
+    roomsDB = db.collection('rooms').doc(roomID);
+    return roomsDB.collection('participants').get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            participants.push(doc.data());
+        });
+        stopLoading();
+        return participants;
+    }).catch((error)=>console.log(error));
+}
+
+function setCallee(roomID) {
+    localStorage.setItem("callee", roomID)
+    if(roomID===undefined | roomID===null){
+        showAlert('danger', 'Please create a room')
+    }
+    else{
+        window.location.href = "./videoCall.html?room="+roomID;
+    }
 }

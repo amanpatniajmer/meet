@@ -49,24 +49,22 @@ function updateParticipants(participants) {
     document.getElementById(id).innerHTML = contentAll;
 }
 
-function createRemoteVideo(participant) {
+function createVideo(name, screen, id) {
     let videos = document.getElementById('videos');
     let i = videos.children.length - 1;
     if (i >= 3) return -1;
     let newVideo = document.createElement('div');
     newVideo.className = 'video';
-    newVideo.innerHTML = "<video id='remoteVideo" + i + "' autoplay playsinline></video>\
+    newVideo.innerHTML = "<video id='" + id + "' autoplay playsinline></video>\
     <div class='sub-controls'>\
         <i class='fa fa-microphone-slash'></i>\
         <i class='fa fa-frown-o'></i>\
     </div>\
-    <div class='name'>" + (participant.screen ? "(Presenting) " : "") + participant.name + "</div>";
+    <div class='name'>" + (screen ? "(Presenting) " : "") + name + "</div>";
     videos.appendChild(newVideo);
     return i;
 }
 
-function removeRemoteVideo(index, participants) {
-    document.getElementById('videos').children[index + 1].remove();
-    participants[index+1]=null;
-    console.log(participants);
+function removeRemoteVideo(id) {
+    document.getElementById(id).remove();
 }

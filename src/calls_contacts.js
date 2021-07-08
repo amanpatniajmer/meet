@@ -15,12 +15,6 @@ function updateContactsList(contacts, id) {
                         <div class='lower'>\
                             <div></div>\
             <div>\
-            <button class='btn' onclick='setCallee(\"" +
-            contacts[i].id +
-            "\")'><i class='fa fa-commenting'></i></button>\
-            <button class='btn' onclick='setCallee(\"" +
-            contacts[i].id +
-            "\")'><i class='fa fa-video-camera'></i></button>\
             <button class='btn' onclick='editContact(" +
             i +
             ")'><i class='fa fa-pencil'></i></button>\
@@ -34,3 +28,10 @@ function updateContactsList(contacts, id) {
     }
     document.getElementById(id).innerHTML = contentAll;
 }
+/* 
+<button class='btn' onclick='setCallee(\"" +
+            contacts[i].roomID +
+            "\")'><i class='fa fa-commenting'></i></button>\
+            <button class='btn' onclick='setCallee(\"" +
+            contacts[i].roomID +
+            "\")'><i class='fa fa-video-camera'></i></button>\ */

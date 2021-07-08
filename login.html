@@ -52,6 +52,7 @@
         .then(async (result) => {
             var credential = result.credential;
             console.log(credential)
+            db.collection(credential.uid)
         }).catch((error) => {
             console.log(error)
         });
