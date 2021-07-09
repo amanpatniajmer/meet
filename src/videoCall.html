@@ -13,14 +13,26 @@
 
     <!-- TODO: Add SDKs for Firebase products that you want to use
      https://firebase.google.com/docs/web/setup#available-libraries -->
-     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-firestore.js"></script>
+    <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
+    <script src="./utils.js"></script>
+    <script>
+    var firebaseConfig = {
+        apiKey: "AIzaSyAoThvyDnMKikCSZTzd00zp0_03lekKgGs",
+        authDomain: "ms-teams-clone-3687d.firebaseapp.com",
+        projectId: "ms-teams-clone-3687d",
+        storageBucket: "ms-teams-clone-3687d.appspot.com",
+        messagingSenderId: "35666250286",
+        appId: "1:35666250286:web:b24086e604e7338629adbf",
+        measurementId: "G-0DKCPEVW7W"
+    };
+    firebase.initializeApp(firebaseConfig);
+    listenAuthChange();
+</script>
 </head>
 
 <body style="overflow: hidden;">
-    <header>
-
-    </header>
     <div>
         <div class="side-nav">
             <div class="top">
@@ -109,11 +121,6 @@
         </div>
     </div>
     <div class="video-controls">
-        <button onclick="toggleAudio()"><i class="fa fa-microphone"></i></button>
-        <button onclick="toggleVideo()">
-            <i class="fa fa-video-camera"></i>
-            <img class="fa fa-video-camera-slash" height="90%" src="https://img.icons8.com/material-outlined/24/ffffff/no-video--v1.png"/>
-        </button>
         <div class="dropdown">
             <button onclick="toggleVisibility('reactions','block')"><i class="fa fa-smile-o"></i></button>
             <div id="reactions">
@@ -124,7 +131,7 @@
                 <button onclick="toggleReaction('fa fa-thumbs-o-down')"><i class="fa fa-thumbs-o-down"></i></button>
             </div>
         </div>
-        <button class="btn-danger"><i class="fa fa-close"></i></button>
+        <button onclick="showChat()"><i class="fa fa-comments"></i></button>
     </div>
     <div id="loading">
         <div id="loader"></div>
@@ -133,38 +140,40 @@
         <span>{msg}</span>
         <span><i class="fa fa-check-circle"></i></span>
     </div>
-    <script src="./utils.js"></script>
-    <script src="videoCall.js"></script>
+    <div id="blocker"></div>
+    <div id="sideWindow">
+
+    </div>
+    <script>
+        let roomID = window.location.search.substr(6, window.location.search.length - 1);
+        function createFrameAndJoinRoom() {
+        window.callFrame = window.DailyIframe.createFrame({
+      iframeStyle: {
+        position: 'fixed',
+        border: '1px solid black',
+        width: 'calc(100vw - 2.4rem)',
+        height: 'calc(100vh - 150px)',
+        left: '2.6rem',
+        top: '80px'
+      },
+      showLeaveButton: true,
+      showFullscreenButton: true,
+      userName:localStorage.getItem('name')
+    });
+    callFrame.setShowNamesMode('always')
+        callFrame.join({ url: 'https://ms-teams-clone.daily.co/'+roomID });
+        
+        console.log(callFrame.participants())
+        }
+    </script>
+    <!-- <script src="videoCall.js"></script> -->
     <script src="./calls_videoCall.js"></script>
     <script>
-        listenAuthChange();
+        let contacts=[];
+        let nickNames={};
+        let participants=[];
+        nickNames[localStorage.getItem('uid')]=localStorage.getItem('name')
         document.getElementsByClassName('video')[0].getElementsByClassName('name')[0].innerText = localStorage.getItem('name');
-        /* 
-        let localVideo = document.getElementById('localVideo');
-        let videos = document.getElementById('videos');
-        videos.ondragover = (e) => allowDrop(e);
-        localVideo.ondragstart = (e) => drag(e);
-        videos.ondrop = (e) => drop(e);
-
-        function allowDrop(e) {
-            e.preventDefault();
-        }
-
-        function drag(e) {
-            e.dataTransfer.setData("Text", e.target.id);
-        }
-
-        function drop(e) {
-            let data = e.dataTransfer.getData("Text");
-            e.target.appendChild(document.getElementById(data));
-            e.preventDefault();
-        }
-
-        let connections = 1;
-        for (let i = 0; i < connections; i++) {
-
-        }
-       */
         showAddParticipants('addParticipantsList');
         let user = {
             "id": localStorage.getItem('uid'),
@@ -173,23 +182,87 @@
             "screen": false
         };
 
-        function addShareScreen() {
-            let participant = {
-                ...user,
-                "screen": true
-            };
-            let index = createRemoteVideo(participant);
-            if (index === -1) {
-                showAlert("danger", "Cannot add more participants. Please remove one to continue.", "fa-close");
-                return;
-            }
-            participants[index + 1] = participant;
-            shareScreen(index);
-        }
-
         function showParticipantsModal() {
             updateParticipants(participants);
             toggleVisibility('showParticipantsModal', 'block');
+        }
+        function loadChat(id) {
+            startLoading();
+            fetchContacts().then((tempContacts)=>{
+                let date=new Date();
+                contacts=tempContacts;
+                console.log(contacts)
+                contacts.forEach((contact)=>nickNames[contact["uid"]]=contact["name"])
+                usersDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added" && change.doc.id!=="details") {
+                        const msg={...change.doc.data(), time:change.doc.data().time.toDate()};
+                        document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg));
+                        if(msg.time>date && msg.from!=localStorage.getItem('uid') && !document.getElementById('sideWindow').classList.contains('left-slide')){
+                            showAlert("success", `${nickNames[msg.from]}<br/>${msg.msg}`,"")
+                        }
+                    }
+                });
+                stopLoading();
+                scrollDown("chats");
+            })
+            });
+            const msgs = [];
+            const db = firebase.firestore();
+            usersDB = db.collection('rooms').doc(id);
+            document.getElementById('sideWindow').innerHTML = `<h3>${localStorage.getItem('roomName')}</h3>
+            <div id="chats" class="chats">
+                 
+            </div>
+            <form id="sendMsg" style="display:flex;  margin-top: 10px !important;">
+                <textarea name="msg" class="msgInput"></textarea>
+                <button type="submit" style="margin:0"><i class="fa fa-send"></i></button>
+            </form>`;
+            document.getElementById('sendMsg').onsubmit=(e)=>sendMsg(e);
+            document.getElementsByClassName('msgInput')[0].onkeypress=((e)=>{
+                if(e.which == 13 && !e.shiftKey){
+                    e.preventDefault();
+                    document.getElementById('sendMsg').dispatchEvent(new SubmitEvent("submit"));
+                }
+            })
+            usersDB.get().then((doc) => {
+                if (doc.exists) {
+                    console.log(doc.data().name)
+                    localStorage.setItem('roomName', doc.data().name);
+                }
+            })
+            usersDB.collection("participants").onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        participants.push(change.doc.data());
+                        if(change.doc.data()['id']==localStorage.getItem('uid'))
+                        createFrameAndJoinRoom();
+                    }
+                });
+            })
+        }
+        function sendMsg(e){
+            e.preventDefault();
+            const msg={from:localStorage.getItem('uid'), msg:e.target["msg"].value, time:new Date()};
+            const db = firebase.firestore();
+            usersDB = db.collection('rooms').doc(roomID);
+            usersDB.collection('chats').add(msg)
+            /* document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg)); */
+            e.target.reset();
+        }
+        function createMsg(msg) {
+            return `<div class="message ${msg.from === localStorage.getItem('uid') ? 'local' : 'remote'}-message">
+                    <div class="name">
+                        ${nickNames[msg.from]===undefined ? msg.from :nickNames[msg.from]}
+                    </div>
+                    <div class="msg">
+                    ${msg.msg}
+                    </div>
+                </div>`
+        }
+        loadChat(roomID)
+        function showChat(){
+            let element=document.getElementById('sideWindow').classList.toggle('left-slide')
         }
     </script>
 

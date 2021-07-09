@@ -1,5 +1,4 @@
 const callee = localStorage.getItem("callee");
-let roomID = window.location.search.substr(6, window.location.search.length - 1);
 console.log(roomID);
 const localUuid=localStorage.getItem('uid');
 let connection = null;
@@ -10,15 +9,6 @@ let nickNames={};
 let contacts=[];
 let participants=[];
 let connections={};
-const firebaseConfig = {
-    apiKey: "AIzaSyAoThvyDnMKikCSZTzd00zp0_03lekKgGs",
-    authDomain: "ms-teams-clone-3687d.firebaseapp.com",
-    projectId: "ms-teams-clone-3687d",
-    storageBucket: "ms-teams-clone-3687d.appspot.com",
-    messagingSenderId: "35666250286",
-    appId: "1:35666250286:web:b24086e604e7338629adbf",
-    measurementId: "G-0DKCPEVW7W"
-};
 const RTCconfig = {
     iceServers: [{
         urls: [
@@ -28,8 +18,6 @@ const RTCconfig = {
     }, ],
     iceCandidatePoolSize: 20
 };
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 const roomDB=db.collection('rooms').doc(roomID);
 let lastMessageID=null;

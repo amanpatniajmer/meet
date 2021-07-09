@@ -6,6 +6,7 @@ body {
 
 * {
     box-sizing: border-box;
+    font-family: Imprima;
 }
 
 :root {
@@ -578,7 +579,7 @@ video {
 .alert {
     display: none;
     z-index: 999;
-    font-size: 18px;
+    font-size: 16px;
     position: fixed;
     box-shadow: 4px 4px 0px 0px rgb(177 177 177);
     bottom: 0;
@@ -729,8 +730,9 @@ video {
 }
 
 .chats{
+    color: #000;
     width:100%;
-    max-height: 300px;
+    height: calc(100% - 130px);
     overflow-y: scroll;
     display: flex;
     flex-direction: column;
@@ -810,3 +812,35 @@ video {
     box-shadow: 1px 4px 8px 0px rgb(147 128 128);
 }
 
+
+
+#blocker{
+    z-index: 5;
+    position: fixed;
+    background-color: #e22121;
+    border: 1px solid black;
+    width: calc(100vw - 2.4rem);
+    height: 40px;
+    left: 2.6rem;
+    top: 80px;
+}
+
+#sideWindow{
+    width: 300px;
+    height: calc(100vh - 155px);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    z-index: 600;
+    position: fixed;
+    top: 80px;
+    padding: 5px;
+    transition: transform 0.5s;
+    right: -305px;
+    box-shadow: -4px 3px 4px 0px rgb(70 70 70);
+}
+
+.left-slide{
+    transform: translateX(-300px);
+}
