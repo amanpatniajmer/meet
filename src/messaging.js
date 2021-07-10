@@ -1,4 +1,4 @@
-function showAddParticipants(id, contacts) {
+function updateAddParticipants(id, contacts) {
     let contentAll = '';
     for (let i = 0; i < contacts.length; i++) {
         let content = "<div class='contact-card'>\

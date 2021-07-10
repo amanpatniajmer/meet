@@ -1,4 +1,4 @@
-function showAddParticipants(id) {
+function updateAddParticipants(id, contacts) {
     let contentAll = '';
     for (let i = 0; i < contacts.length; i++) {
         let content = "<div class='contact-card'>\
@@ -13,8 +13,8 @@ function showAddParticipants(id) {
                 </div>\
                 <div>\
                     <button onclick='sendInvite(\"" +
-            contacts[i].id +
-            "\")'><i class='fa fa-video-camera'></i> Invite</button>\
+            contacts[i].uid +
+            "\")'><i class='fa fa-plus-circle'></i> Add</button>\
                </div>\
             </div>\
         </div>";

@@ -193,7 +193,7 @@
 
         function addParticipants(){
             toggleVisibility('addParticipantsModal', 'block');
-            showAddParticipants('addParticipantsList', contacts.filter((contact)=>{
+            updateAddParticipants('addParticipantsList', contacts.filter((contact)=>{
                 return !participants.find((participant)=>{return participant.id==contact.uid})
             }));
         }

@@ -70,31 +70,8 @@
                     </li>
                 </ul>
             </nav>
-            <div class="dropdown">
-                <button class="right-align" onclick="toggleVisibility('featuresDropdown', 'block')"><i
-                        class="fa fa-bars"></i></button>
-                <ul id="featuresDropdown">
-                    <li onclick="toggleVisibility('addParticipantsModal', 'block');">Add Participants</li>
-                    <li onclick="showParticipantsModal()">Show Participants</li>
-                    <li>Change Background</li>
-                    <li>Whiteboard</li>
-                    <li>Mute All</li>
-                    <li>Chat</li>
-                    <li onclick="addShareScreen()">Present Screen</li>
-                    <li>Full Screen</li>
-                </ul>
-            </div>
             <div id="videos">
-                <div class="video">
-                    <video id="localVideo" autoplay draggable="true" muted="true"></video>
-                    <div class="sub-controls">
-                        <i class="fa fa-microphone"></i>
-                        <i class="fa fa-smile-o"></i>
-                    </div>
-                    <div class="name">
-
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -104,17 +81,6 @@
                 class="fa fa-close"></i></button></h1>
             <div class="content">
                 <div id="addParticipantsList">
-
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="showParticipantsModal" class="modal">
-        <div class="modalBox border-radius">
-            <h1>Participants <button class="right-align btn-danger" onclick="toggleVisibility('showParticipantsModal', 'block');"><i
-                class="fa fa-close"></i></button></h1>
-            <div class="content">
-                <div id="participantsList">
 
                 </div>
             </div>
@@ -132,6 +98,8 @@
             </div>
         </div>
         <button onclick="showChat()"><i class="fa fa-comments"></i></button>
+        <button onclick="showAddParticipantsModal()"><i class="fa fa-user-plus"></i></button>
+        <button onclick="showWhiteBoard()"><i class="fa fa-pencil-square"></i></button>
     </div>
     <div id="loading">
         <div id="loader"></div>
@@ -147,44 +115,54 @@
     <script>
         let roomID = window.location.search.substr(6, window.location.search.length - 1);
         function createFrameAndJoinRoom() {
-        window.callFrame = window.DailyIframe.createFrame({
-      iframeStyle: {
-        position: 'fixed',
-        border: '1px solid black',
-        width: 'calc(100vw - 2.4rem)',
-        height: 'calc(100vh - 150px)',
-        left: '2.6rem',
-        top: '80px'
-      },
-      showLeaveButton: true,
-      showFullscreenButton: true,
-      userName:localStorage.getItem('name')
-    });
-    callFrame.setShowNamesMode('always')
-        callFrame.join({ url: 'https://ms-teams-clone.daily.co/'+roomID });
-        
-        console.log(callFrame.participants())
+            window.callFrame = window.DailyIframe.createFrame({
+                iframeStyle: {
+                    position: 'fixed',
+                    border: '1px solid black',
+                    width: 'calc(100vw - 2.4rem)',
+                    height: 'calc(100vh - 150px)',
+                    left: '2.6rem',
+                    top: '80px'
+                },
+                showLeaveButton: true,
+                showFullscreenButton: true,
+                userName:localStorage.getItem('name')
+            });
+            callFrame.setShowNamesMode('always')
+            callFrame.join({ url: 'https://ms-teams-clone.daily.co/'+roomID });
         }
     </script>
-    <!-- <script src="videoCall.js"></script> -->
     <script src="./calls_videoCall.js"></script>
     <script>
+        let allowed=false;
         let contacts=[];
         let nickNames={};
         let participants=[];
-        nickNames[localStorage.getItem('uid')]=localStorage.getItem('name')
-        document.getElementsByClassName('video')[0].getElementsByClassName('name')[0].innerText = localStorage.getItem('name');
-        showAddParticipants('addParticipantsList');
-        let user = {
-            "id": localStorage.getItem('uid'),
-            "name": localStorage.getItem('name'),
-            "email": localStorage.getItem('email'),
-            "screen": false
-        };
+        let uid=localStorage.getItem('uid');
+        nickNames[uid]=localStorage.getItem('name')
 
-        function showParticipantsModal() {
-            updateParticipants(participants);
-            toggleVisibility('showParticipantsModal', 'block');
+        function showAddParticipantsModal() {
+            if(!allowed) return;
+            toggleVisibility('addParticipantsModal', 'block');
+            updateAddParticipants('addParticipantsList', contacts.filter((contact)=>{
+                return !participants.find((participant)=>{return participant.id==contact.uid})
+            }));
+        }
+
+        function showWhiteBoard(){
+
+        }
+
+        function sendInvite(id){
+            const db = firebase.firestore();
+            db.collection('users').doc(id).collection('rooms').add({
+                id:roomID,
+                name:localStorage.getItem("roomName")
+            });
+            db.collection('rooms').doc(roomID).collection('participants')
+            .add({
+                id:id,
+            }).then(()=>showAlert("success", "Added participant", "fa-check"));
         }
         function loadChat(id) {
             startLoading();
@@ -198,7 +176,8 @@
                     if (change.type === "added" && change.doc.id!=="details") {
                         const msg={...change.doc.data(), time:change.doc.data().time.toDate()};
                         document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg));
-                        if(msg.time>date && msg.from!=localStorage.getItem('uid') && !document.getElementById('sideWindow').classList.contains('left-slide')){
+                        document.getElementById('chats').style.visibility=(allowed?'visible':'hidden')
+                        if(msg.time>date && msg.from!=uid && !document.getElementById('sideWindow').classList.contains('left-slide')){
                             showAlert("success", `${nickNames[msg.from]}<br/>${msg.msg}`,"")
                         }
                     }
@@ -209,7 +188,7 @@
             });
             const msgs = [];
             const db = firebase.firestore();
-            usersDB = db.collection('rooms').doc(id);
+            roomsDB = db.collection('rooms').doc(id);
             document.getElementById('sideWindow').innerHTML = `<h3>${localStorage.getItem('roomName')}</h3>
             <div id="chats" class="chats">
                  
@@ -225,33 +204,40 @@
                     document.getElementById('sendMsg').dispatchEvent(new SubmitEvent("submit"));
                 }
             })
-            usersDB.get().then((doc) => {
+            roomsDB.get().then((doc) => {
                 if (doc.exists) {
                     console.log(doc.data().name)
                     localStorage.setItem('roomName', doc.data().name);
                 }
             })
-            usersDB.collection("participants").onSnapshot((snapshot) => {
+            roomsDB.collection("participants").onSnapshot((snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
                         participants.push(change.doc.data());
-                        if(change.doc.data()['id']==localStorage.getItem('uid'))
-                        createFrameAndJoinRoom();
+                        if(change.doc.data()['id']==uid){
+                            allowed=true;
+                            createFrameAndJoinRoom();
+                            document.getElementById('videos').innerHTML=''
+                        }
+                        else{
+                            document.getElementById('videos').innerHTML='<i>You are not added in the room.<br/> Please contact Room owner.</i>'
+                        }
                     }
                 });
             })
         }
         function sendMsg(e){
             e.preventDefault();
-            const msg={from:localStorage.getItem('uid'), msg:e.target["msg"].value, time:new Date()};
+            if(!allowed) return;
+            const msg={from:uid, msg:e.target["msg"].value, time:new Date()};
             const db = firebase.firestore();
-            usersDB = db.collection('rooms').doc(roomID);
-            usersDB.collection('chats').add(msg)
+            roomsDB = db.collection('rooms').doc(roomID);
+            roomsDB.collection('chats').add(msg)
             /* document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg)); */
             e.target.reset();
         }
         function createMsg(msg) {
-            return `<div class="message ${msg.from === localStorage.getItem('uid') ? 'local' : 'remote'}-message">
+            return `<div class="message ${msg.from === uid ? 'local' : 'remote'}-message">
                     <div class="name">
                         ${nickNames[msg.from]===undefined ? msg.from :nickNames[msg.from]}
                     </div>

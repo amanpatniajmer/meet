@@ -18,6 +18,7 @@ function showAlert(type, msg, iconClass) {
 }
 
 function getAvatar(name) {
+    if(name==null || name== undefined) return '';
     let avatar = name[0].toUpperCase();
     let index = name.indexOf(' ');
     if (index != -1) avatar += name[index + 1].toUpperCase();
