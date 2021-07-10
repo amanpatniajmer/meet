@@ -164,6 +164,14 @@
                 id:id,
             }).then(()=>showAlert("success", "Added participant", "fa-check"));
         }
+        function getRoom(){
+            roomsDB.get().then((doc) => {
+                if (doc.exists) {
+                    console.log(doc.data().name)
+                    localStorage.setItem('roomName', doc.data().name);
+                }
+            })
+        }
         function loadChat(id) {
             startLoading();
             fetchContacts().then((tempContacts)=>{
@@ -204,20 +212,16 @@
                     document.getElementById('sendMsg').dispatchEvent(new SubmitEvent("submit"));
                 }
             })
-            roomsDB.get().then((doc) => {
-                if (doc.exists) {
-                    console.log(doc.data().name)
-                    localStorage.setItem('roomName', doc.data().name);
-                }
-            })
             roomsDB.collection("participants").onSnapshot((snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
                         participants.push(change.doc.data());
                         if(change.doc.data()['id']==uid){
                             allowed=true;
+                            getRoom();
                             createFrameAndJoinRoom();
                             document.getElementById('videos').innerHTML=''
+                            document.getElementById('chats').style.visibility='visible'
                         }
                         else{
                             document.getElementById('videos').innerHTML='<i>You are not added in the room.<br/> Please contact Room owner.</i>'
