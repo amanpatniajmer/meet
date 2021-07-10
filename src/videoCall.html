@@ -179,7 +179,7 @@
                 contacts=tempContacts;
                 console.log(contacts)
                 contacts.forEach((contact)=>nickNames[contact["uid"]]=contact["name"])
-                usersDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
+                roomsDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added" && change.doc.id!=="details") {
                         const msg={...change.doc.data(), time:change.doc.data().time.toDate()};
@@ -194,7 +194,6 @@
                 scrollDown("chats");
             })
             });
-            const msgs = [];
             const db = firebase.firestore();
             roomsDB = db.collection('rooms').doc(id);
             document.getElementById('sideWindow').innerHTML = `<h3>${localStorage.getItem('roomName')}</h3>
