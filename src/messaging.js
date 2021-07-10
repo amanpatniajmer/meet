@@ -1,20 +1,18 @@
-function updateAddParticipants(id, contacts) {
+function updateAddParticipants(id, participants) {
     let contentAll = '';
-    for (let i = 0; i < contacts.length; i++) {
+    console.log(participants)
+    for (let i = 0; i < participants.length; i++) {
         let content = "<div class='contact-card'>\
             <div class='upper'>\
                 <div>\
                     <div class='avatar'>" +
-            getAvatar(contacts[i].name) +
+            getAvatar(participants[i].id) +
             "</div>\
                     <span class='name'>" +
-            contacts[i].name +
+            nickNames[participants[i].id] +
             "</span>\
                 </div>\
                 <div>\
-                    <button onclick='sendInvite(\"" +
-            contacts[i].uid +
-            "\")'><i class='fa fa-plus-circle'></i> Add</button>\
                </div>\
             </div>\
         </div>";

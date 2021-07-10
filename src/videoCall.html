@@ -125,10 +125,10 @@
                     top: '80px'
                 },
                 showLeaveButton: true,
-                showFullscreenButton: true,
-                userName:localStorage.getItem('name')
+                userName: localStorage.getItem('name')
             });
             callFrame.setShowNamesMode('always')
+            callFrame.setUserName(localStorage.getItem('name'))
             callFrame.join({ url: 'https://ms-teams-clone.daily.co/'+roomID });
         }
     </script>

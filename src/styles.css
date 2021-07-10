@@ -522,7 +522,7 @@ video {
 
 .modalBox h1 {
     background-color: var(--primary-color);
-    color: rgb(143, 105, 105);
+    color: #fff;
     padding: 5px;
     font-size: 1.5rem;
     margin: 0;

@@ -30,6 +30,15 @@
         firebase.initializeApp(firebaseConfig);
         listenAuthChange();
     </script>
+    <style>
+        .filters > *{
+            margin: 0 5px;
+            margin-bottom: 5px;
+            padding: 10px;
+            border-radius: 50%;
+            width:40px;
+        }
+    </style>
 </head>
 
 <body>
@@ -132,12 +141,13 @@
     <script>
         startLoading();
         let roomID = window.location.search.substr(6, window.location.search.length - 1);
-        document.onload = roomID? loadChat(roomID):fetchRooms();
         let rooms = [];
         let participants=[];
         let nickNames={};
         nickNames[localStorage.getItem('uid')]=localStorage.getItem('name')
         let contacts=[];
+        let allowed=false;
+        document.onload = roomID? loadChat(roomID):fetchRooms();
         async function fetchRooms() {
             const db = firebase.firestore();
             usersDB = db.collection('users').doc(localStorage.getItem('uid'))
@@ -154,6 +164,26 @@
         }
 
         let addRoomForm = document.getElementById('addRoomForm');
+
+        function postRequest(roomID){
+            const url = 'https://api.daily.co/v1/rooms/';
+            const options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer 3f3e5da0763f513fd7c9572a6a93bc93ddbd2950a5d01e9b4b3236c072218d62'
+            },
+            body: JSON.stringify({name: roomID,properties: {enable_new_call_ui: false, enable_network_ui: false}})
+            };
+
+            fetch(url, options)
+            .then(res => res.json())
+            .then(json => console.log(json))
+            .catch(err => console.error('error:' + err));
+        }
+
+
         addRoomForm.onsubmit = function(e) {
             e.preventDefault();
             startLoading();
@@ -162,6 +192,7 @@
             db.collection('users').doc(localStorage.getItem('uid'));
             db.collection("rooms").add(newRoom).then((room)=>{
                 console.log(room.id);
+                postRequest(room.id)
                 console.log(newRoom)
                 room.collection("participants").add({id:localStorage.getItem('uid')}).then(()=>{
                     console.log('added to')
@@ -172,17 +203,6 @@
                 })
                 stopLoading();
             })
-
-            /* usersDB.collection("rooms") */
-
-            /* .add(newContact)
-            .then((res)=>{
-                showAlert("success", "Contact Saved", "fa-check");
-                contacts.push({...newContact, id:res.id});
-                updateContactsList(contacts, 'contactsList');
-                stopLoading()
-            })
-            .catch((err)=>console.log(err)); */
             addRoomForm.reset();
         }
         document.getElementById('addRoomClose').onclick = () => toggleVisibility('addRoomModal', 'block');
@@ -231,7 +251,8 @@
             document.getElementsByClassName('tab')[0].innerHTML = `<h3>${localStorage.getItem('roomName')}</h3>
                 <div class="filters">
                     <button onclick="setCallee(roomID)" class="btn border-radius" id="addContact"><i class="fa fa-video-camera"></i></button>
-                    <button onclick="addParticipants()" class="btn-primary border-radius" id="addContact"><i class="fa fa-plus-circle"></i> Add Participant</button>
+                    <button onclick="addParticipants()" class="btn-primary border-radius" id="addContact"><i class="fa fa-user-plus"></i> </button>
+                    <button onclick="showParticipants()" class="btn-primary"><i class="fa fa-user"></i> </button>
                 </div>
             <div id="chats" class="chats">
                  
@@ -241,6 +262,12 @@
                 <button type="submit" style="margin:0"><i class="fa fa-send"></i></button>
             </form>`;
             document.getElementById('sendMsg').onsubmit=(e)=>sendMsg(e)
+            document.getElementsByClassName('msgInput')[0].onkeypress=((e)=>{
+                if(e.which == 13 && !e.shiftKey){
+                    e.preventDefault();
+                    document.getElementById('sendMsg').dispatchEvent(new SubmitEvent("submit"));
+                }
+            })
             usersDB.collection("participants").onSnapshot((snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
@@ -280,6 +307,11 @@
                         ${new Date(msg.time).toLocaleDateString()+"  "+new Date(msg.time).toLocaleTimeString()}
                     </div>
                 </div>`
+        }
+
+        function showParticipants() {
+            toggleVisibility('showParticipantsModal', 'block');
+            updateAddParticipants('participantsList', participants)
         }
     </script>
 
