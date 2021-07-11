@@ -41,9 +41,6 @@
             <div class="top">
             </div>
             <div class="mid">
-                <a>
-                    <i class="fa fa-bell-o"></i>
-                </a>
                 <a class="active">
                     <i class="fa fa-commenting-o"></i>
                 </a>
@@ -192,6 +189,7 @@
             e.preventDefault();
             startLoading();
             const newRoom = formToJSON(e.target);
+            newRoom.name=newRoom.name.trim();
             const db=firebase.firestore();
             db.collection('users').doc(uid);
             db.collection("rooms").add(newRoom).then((room)=>{
@@ -270,7 +268,13 @@
                 roomsDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added" && change.doc.id!=="details") {
-                        const msg={...change.doc.data(), time:change.doc.data().time.toDate()};
+                        let msg={...change.doc.data(), time:change.doc.data().time.toDate()};
+                        if(msg.from ==='bot'){
+                            let end=msg.msg.indexOf(' ')
+                            let name=nickNames[msg.msg.substr(0,end)]
+                            if(name===undefined) name="Unknown";
+                            msg.msg=name+" "+msg.msg.substr(end+1);
+                        }
                         document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg));
                     }
                 });

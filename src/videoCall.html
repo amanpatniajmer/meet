@@ -38,9 +38,6 @@
             <div class="top">
             </div>
             <div class="mid">
-            <a>
-                <i class="fa fa-bell-o"></i>
-            </a>
             <a href="./messaging.html">
                 <i class="fa fa-commenting-o"></i>
             </a>
@@ -102,9 +99,19 @@
     <div id="sideWindow">
 
     </div>
+    <script src="./calls_videoCall.js"></script>
     <script>
         document.querySelector('.main-nav .avatar').innerHTML=getAvatar(name)
+
         let roomID = window.location.search.substr(6, window.location.search.length - 1);
+        let allowed=false;
+        let contacts=[];
+        let nickNames={};
+        let participants=[];
+        uid=localStorage.getItem('uid');
+        name=localStorage.getItem('name');
+        nickNames[uid]='You'
+
         function createFrameAndJoinRoom() {
             window.callFrame = window.DailyIframe.createFrame({
                 iframeStyle: {
@@ -122,16 +129,6 @@
             callFrame.setUserName(name)
             callFrame.join({ url: 'https://ms-teams-clone.daily.co/'+roomID });
         }
-    </script>
-    <script src="./calls_videoCall.js"></script>
-    <script>
-        let allowed=false;
-        let contacts=[];
-        let nickNames={};
-        let participants=[];
-        uid=localStorage.getItem('uid');
-        name=localStorage.getItem('name');
-        nickNames[uid]='You'
 
         function showAddParticipantsModal() {
             if(!allowed) return;
@@ -164,7 +161,7 @@
         }
         function loadChat(id) {
             startLoading();
-            const msg={from:"bot",time:new Date(), msg:`${name} Joined videoChat`}
+            const msg={from:"bot",time:new Date(), msg:`${uid} Joined videoChat`}
             Promise.all([fetchContacts(), addMsg(msg)]).then((values)=>{
                 let date=new Date();
                 contacts=values[0];
@@ -172,7 +169,13 @@
                 roomsDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added" && change.doc.id!=="details") {
-                        const msg={...change.doc.data(), time:change.doc.data().time.toDate()};
+                        let msg={...change.doc.data(), time:change.doc.data().time.toDate()};
+                        if(msg.from ==='bot'){
+                            let end=msg.msg.indexOf(' ')
+                            let name=nickNames[msg.msg.substr(0,end)]
+                            if(name===undefined) name="Unknown";
+                            msg.msg = name+" "+msg.msg.substr(end+1);
+                        }
                         document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg));
                         document.getElementById('chats').style.visibility=(allowed?'visible':'hidden')
                         if(msg.time>date && msg.from!=uid && !document.getElementById('sideWindow').classList.contains('left-slide')){
@@ -236,12 +239,12 @@
         }
         function sendMsg(e){
             e.preventDefault();
-            if(!allowed) return;
-            const msg={from:uid, msg:e.target["msg"].value, time:new Date()};
+            let temp=e.target["msg"].value.trim();
+            if(!allowed || temp==null || temp==undefined || temp=='') return;
+            const msg={from:uid, msg:temp, time:new Date()};
             const db = firebase.firestore();
             roomsDB = db.collection('rooms').doc(roomID);
             roomsDB.collection('chats').add(msg)
-            /* document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg)); */
             e.target.reset();
         }
         function createMsg(msg) {
@@ -250,7 +253,7 @@
                         ${msg.from!=='bot' ? (nickNames[msg.from]===undefined ? msg.from :nickNames[msg.from]) : ""}
                     </div>
                     <div class="msg">
-                    ${msg.msg}
+                        ${msg.msg}
                     </div>
                 </div>`
         }
@@ -263,15 +266,15 @@
                 case 'fa fa-hand-paper-o':
                     classList = document.querySelector('.video-controls button:nth-child(1)').classList;
                     classList.toggle('selected')
-                    msg={from:"bot",time:new Date(), msg:`${name} ${classList.contains('selected') ? 'raised hand': 'unraised hand' }`}
+                    msg={from:"bot",time:new Date(), msg:`${uid} ${classList.contains('selected') ? 'raised hand': 'unraised hand' }`}
                     addMsg(msg);
                     break;
                 case 'fa fa-thumbs-o-up':
-                    msg={from:"bot",time:new Date(), msg:`${name} Liked`}
+                    msg={from:"bot",time:new Date(), msg:`${uid} Liked`}
                     addMsg(msg);
                     break;
                 case 'fa fa-thumbs-o-down':
-                    msg={from:"bot",time:new Date(), msg:`${name} Disliked`}
+                    msg={from:"bot",time:new Date(), msg:`${uid} Disliked`}
                     addMsg(msg);
                     break;
             }

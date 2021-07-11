@@ -41,9 +41,6 @@
             <div class="top">
             </div>
             <div class="mid">
-            <a>
-                <i class="fa fa-bell-o"></i>
-            </a>
             <a href="./messaging.html">
                 <i class="fa fa-commenting-o"></i>
             </a>
@@ -163,7 +160,7 @@
                     newContact={...newContact, uid:doc.id}
                 })
                 console.log(newContact);
-                usersDB = db.collection('users').doc(localStorage.getItem('uid'));
+                usersDB = db.collection('users').doc(uid);
                 usersDB.collection("contacts")
                 .add(newContact)
                 .then((res)=>{
@@ -183,10 +180,10 @@
         }
 
         document.getElementById('editContactClose').onclick = () => toggleVisibility('editContactModal', 'block');
-        let editIndex = null;
+        let editID = null;
 
-        function editContact(index) {
-            editIndex = index;
+        function editContact(id) {
+            editID = id;
             document.getElementById('editContactModal').style.display = 'block';
             let form = document.getElementById('editContactForm');
             for (let key in contacts[index]) {
@@ -198,34 +195,36 @@
         editContactForm.onsubmit = function(e) {
             e.preventDefault();
             startLoading();
+            if(editID===null) return;
             const newContact = formToJSON(e.target);
+            newContact.name=newContact.name.trim();
             const db=firebase.firestore();
-            usersDB = db.collection('users').doc(localStorage.getItem('uid'));
-            usersDB.collection("contacts").doc(contacts[editIndex].id)
+            usersDB = db.collection('users').doc(uid);
+            usersDB.collection("contacts").doc(editID)
             .set(newContact, {merge:true})
             .then((res)=>{
                 showAlert("success", "Successfully edited contact", "fa-check");
                 stopLoading()
             })
             .catch((err)=>console.log(err));
-            contacts[editIndex] = newContact;
+            contacts[contacts.findIndex((contact)=>contact.id==editID)] = newContact;
             updateContactsList(contacts, 'contactsList');
             editContactForm.reset();
-            editIndex = null;
+            editID = null;
         }
 
-        function deleteContact(index) {
+        function deleteContact(id) {
             startLoading();
             const db=firebase.firestore();
-            usersDB = db.collection('users').doc(localStorage.getItem('uid'));
-            usersDB.collection("contacts").doc(contacts[index].id)
+            usersDB = db.collection('users').doc(uid);
+            usersDB.collection("contacts").doc(id)
             .delete()
             .then(()=>{
                 showAlert("success", "Successfully Deleted!", "fa-check")
                 stopLoading()
             })
             .catch((err)=>console.log(err));
-            contacts.splice(index, 1);
+            contacts.splice(contacts.findIndex((contact)=>contact.id==id), 1);
             updateContactsList(contacts, 'contactsList');
         }
 

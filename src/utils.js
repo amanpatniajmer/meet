@@ -105,11 +105,11 @@ function listenAuthChange(){
                 name:user.displayName,
                 email:user.email,
             });
-            if(location.href.includes('/login.html'))location.href="/index.html";
+            if(location.href.includes('/index.html'))location.href="/src/messaging.html";
         } else {
             console.log('Logged out')
             console.log(location.href)
-            if(!location.href.includes('/login.html'))location.href='/login.html'
+            if(!location.href.includes('/index.html'))location.href='/index.html'
         }
     });
 }
