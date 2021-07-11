@@ -84,19 +84,12 @@
         </div>
     </div>
     <div class="video-controls">
-        <div class="dropdown">
-            <button onclick="toggleVisibility('reactions','block')"><i class="fa fa-smile-o"></i></button>
-            <div id="reactions">
-                <button onclick="toggleReaction('fa fa-smile-o')"><i class="fa fa-smile-o"></i></button>
-                <button onclick="toggleReaction('fa fa-frown-o')"><i class="fa fa-frown-o"></i></button>
-                <button onclick="toggleReaction('fa fa-hand-paper-o')"><i class="fa fa-hand-paper-o"></i></button>
-                <button onclick="toggleReaction('fa fa-thumbs-o-up')"><i class="fa fa-thumbs-o-up"></i></button>
-                <button onclick="toggleReaction('fa fa-thumbs-o-down')"><i class="fa fa-thumbs-o-down"></i></button>
-            </div>
-        </div>
+        <button onclick="toggleReaction('fa fa-hand-paper-o')"><i class="fa fa-hand-paper-o"></i></button>
+        <button onclick="toggleReaction('fa fa-thumbs-o-up')"><i class="fa fa-thumbs-o-up"></i></button>
+        <button onclick="toggleReaction('fa fa-thumbs-o-down')"><i class="fa fa-thumbs-o-down"></i></button>
         <button onclick="showChat()"><i class="fa fa-comments"></i></button>
         <button onclick="showAddParticipantsModal()"><i class="fa fa-user-plus"></i></button>
-        <button onclick="showWhiteBoard()"><i class="fa fa-pencil-square"></i></button>
+        <button onclick="showWhiteboard()"><i class="fa fa-pencil-square"></i></button>
     </div>
     <div id="loading">
         <div id="loader"></div>
@@ -138,9 +131,6 @@
         let uid=localStorage.getItem('uid');
         nickNames[uid]=localStorage.getItem('name')
 
-        const msg={from:"bot",time:new Date(), msg:`${localStorage.getItem('name')} Joined videoChat`}
-        addMsg(msg)
-
         function showAddParticipantsModal() {
             if(!allowed) return;
             toggleVisibility('addParticipantsModal', 'block');
@@ -149,8 +139,8 @@
             }));
         }
 
-        function showWhiteBoard(){
-
+        function showWhiteboard(){
+            window.open(`./board.html?room=${roomID}`, "_blank");
         }
 
         function sendInvite(id){
@@ -174,7 +164,8 @@
         }
         function loadChat(id) {
             startLoading();
-            fetchContacts().then((tempContacts)=>{
+            const msg={from:"bot",time:new Date(), msg:`${localStorage.getItem('name')} Joined videoChat`}
+            Promise.all([fetchContacts(), addMsg(msg)]).then((tempContacts)=>{
                 let date=new Date();
                 contacts=tempContacts;
                 console.log(contacts)
@@ -186,7 +177,7 @@
                         document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg));
                         document.getElementById('chats').style.visibility=(allowed?'visible':'hidden')
                         if(msg.time>date && msg.from!=uid && !document.getElementById('sideWindow').classList.contains('left-slide')){
-                            showAlert("success", `${nickNames[msg.from]}<br/>${msg.msg}`,"")
+                            showAlert("success", `${nickNames[msg.from]===undefined?(msg.from==='bot'?'':msg.from):nickNames[msg.from]}<br/>${msg.msg}`,"")
                         }
                     }
                 });
@@ -250,6 +241,27 @@
                 </div>`
         }
         loadChat(roomID)
+        function toggleReaction(className){
+            if(!allowed) return;
+            let classList;
+            let msg;
+            switch(className){
+                case 'fa fa-hand-paper-o':
+                    classList = document.querySelector('.video-controls button:nth-child(1)').classList;
+                    classList.toggle('selected')
+                    msg={from:"bot",time:new Date(), msg:`${localStorage.getItem('name')} ${classList.contains('selected') ? 'raised hand': 'unraised hand' }`}
+                    addMsg(msg);
+                    break;
+                case 'fa fa-thumbs-o-up':
+                    msg={from:"bot",time:new Date(), msg:`${localStorage.getItem('name')} Liked`}
+                    addMsg(msg);
+                    break;
+                case 'fa fa-thumbs-o-down':
+                    msg={from:"bot",time:new Date(), msg:`${localStorage.getItem('name')} Disliked`}
+                    addMsg(msg);
+                    break;
+            }
+        }
         function showChat(){
             let element=document.getElementById('sideWindow').classList.toggle('left-slide')
         }

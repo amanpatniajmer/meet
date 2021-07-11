@@ -449,8 +449,8 @@ video {
     position: absolute;
     background-color: rgba(0, 0, 0, 0.5);
     bottom: 20px;
-    width: calc(100vw - 116px);
-    left: 90px;
+    width: calc(100vw - 50px);
+    left: 45px;
     border-radius: 10px;
     z-index: 20;
     display: flex;
@@ -461,10 +461,15 @@ video {
     color: white;
     border-radius: 5px !important;
     background-color: var(--primary-color);
-    font-size: 25px !important;
+    font-size: 20px !important;
     margin-right: 15px;
     width: 50px;
     box-shadow: none;
+}
+
+.video-controls button.selected{
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.7) !important;
 }
 
 .video-controls button:hover {
@@ -862,7 +867,7 @@ video {
 #blocker{
     z-index: 5;
     position: fixed;
-    background-color: #e22121;
+    background-color: rgb(57, 57, 57);
     border: 1px solid black;
     width: calc(100vw - 2.4rem);
     height: 40px;
