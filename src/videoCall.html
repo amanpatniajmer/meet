@@ -134,9 +134,6 @@
         function showAddParticipantsModal() {
             if(!allowed) return;
             toggleVisibility('addParticipantsModal', 'block');
-            updateAddParticipants('addParticipantsList', contacts.filter((contact)=>{
-                return !participants.find((participant)=>{return participant.id==contact.uid})
-            }));
         }
 
         function showWhiteboard(){
@@ -165,9 +162,9 @@
         function loadChat(id) {
             startLoading();
             const msg={from:"bot",time:new Date(), msg:`${localStorage.getItem('name')} Joined videoChat`}
-            Promise.all([fetchContacts(), addMsg(msg)]).then((tempContacts)=>{
+            Promise.all([fetchContacts(), addMsg(msg)]).then((values)=>{
                 let date=new Date();
-                contacts=tempContacts;
+                contacts=values[0];
                 console.log(contacts)
                 contacts.forEach((contact)=>nickNames[contact["uid"]]=contact["name"])
                 roomsDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
@@ -212,10 +209,21 @@
                             createFrameAndJoinRoom();
                             document.getElementById('videos').innerHTML=''
                             document.getElementById('chats').style.visibility='visible'
+                            updateAddParticipants('addParticipantsList', contacts.filter((contact)=>{
+                                return !participants.find((participant)=>{return participant.id==contact.uid})
+                            }));
                         }
                         else{
                             document.getElementById('videos').innerHTML='<i>You are not added in the room.<br/> Please contact Room owner.</i>'
                         }
+                    }
+                    if(change.type==="removed"){
+                        const participant={...change.doc.data(), docID: change.doc.id};
+                        if(participant.id===localStorage.getItem('uid')) allowed=false;
+                        participants.splice(participants.findIndex((p)=>participant.id===p.id),1);
+                        updateAddParticipants('addParticipantsList', contacts.filter((contact)=>{
+                            return !participants.find((participant)=>{return participant.id==contact.uid})
+                        }));
                     }
                 });
             })

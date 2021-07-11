@@ -1,31 +1,5 @@
-function updateAddParticipants(id, contacts) {
+function updateAddParticipants(id, participants) {
     let contentAll = '';
-    for (let i = 0; i < contacts.length; i++) {
-        let content = "<div class='contact-card'>\
-            <div class='upper'>\
-                <div>\
-                    <div class='avatar'>" +
-            getAvatar(contacts[i].name) +
-            "</div>\
-                    <span class='name'>" +
-            contacts[i].name +
-            "</span>\
-                </div>\
-                <div>\
-                    <button onclick='sendInvite(\"" +
-            contacts[i].uid +
-            "\")'><i class='fa fa-plus-circle'></i> Add</button>\
-               </div>\
-            </div>\
-        </div>";
-        contentAll += content;
-    }
-    document.getElementById(id).innerHTML = contentAll;
-}
-
-function updateParticipants(participants) {
-    let contentAll = '';
-    let id = 'participantsList';
     for (let i = 0; i < participants.length; i++) {
         let content = "<div class='contact-card'>\
             <div class='upper'>\
@@ -37,10 +11,10 @@ function updateParticipants(participants) {
             participants[i].name +
             "</span>\
                 </div></div>\
-                <div class='lower'>\
-                    <button onclick='removeParticipant(\"" +
-            participants[i].id +
-            "\")'>Remove <i class='fa fa-close'></i> </button>\
+               <div class='lower'>\
+                    <button onclick='sendInvite(\"" +
+            participants[i].uid +
+            "\")'>Invite <i class='fa fa-plus'></i> </button>\
                </div>\
             </div>\
         </div>";
