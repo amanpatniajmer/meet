@@ -4,7 +4,6 @@ function stopLoading() {
 
 function startLoading() {
     document.getElementById('loading').style.display = "flex";
-    console.log('loading')
 }
 
 function showAlert(type, msg, iconClass) {

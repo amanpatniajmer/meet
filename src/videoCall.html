@@ -65,7 +65,7 @@
                 </ul>
             </nav>
             <div id="videos">
-                <i>You are not added in the room.<br/> Please contact Room owner.</i>
+                <i>Establishing connection...<br/>OR<br/>You are not added in the room.</i>
             </div>
         </div>
     </div>
@@ -128,6 +128,10 @@
             callFrame.setShowNamesMode('always')
             callFrame.setUserName(name)
             callFrame.join({ url: 'https://ms-teams-clone.daily.co/'+roomID });
+            callFrame.on('left-meeting',()=>{
+                const msg={from:"bot",time:new Date(), msg:`${uid} left videoChat`}
+                addMsg(msg);
+            })
         }
 
         function showAddParticipantsModal() {
@@ -179,7 +183,7 @@
                         document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg));
                         document.getElementById('chats').style.visibility=(allowed?'visible':'hidden')
                         if(msg.time>date && msg.from!=uid && !document.getElementById('sideWindow').classList.contains('left-slide')){
-                            showAlert("success", `${nickNames[msg.from]===undefined?(msg.from==='bot'?'':msg.from):nickNames[msg.from]}<br/>${msg.msg}`,"")
+                            showAlert("success", `${nickNames[msg.from]===undefined?(msg.from==='bot'?'':msg.from):nickNames[msg.from]+"<br/>"}${msg.msg}`,"")
                         }
                     }
                 });
