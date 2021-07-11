@@ -229,7 +229,7 @@
 
         function sendInvite(id){
             const db = firebase.firestore();
-            db.collection('users').doc(localStorage.getItem('uid')).collection('rooms').add({
+            db.collection('users').doc(id).collection('rooms').add({
                 id:roomID,
                 name:localStorage.getItem("roomName")
             });
@@ -326,7 +326,7 @@
         function createMsg(msg) {
             return `<div class="message ${msg.from === localStorage.getItem('uid') ? 'local' : 'remote'}-message">
                     <div class="name">
-                        ${nickNames[msg.from]===undefined ? msg.email :nickNames[msg.from]}
+                        ${nickNames[msg.from]===undefined ? "Unknown" :nickNames[msg.from]}
                     </div>
                     <div class="msg">
                     ${msg.msg}

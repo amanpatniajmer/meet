@@ -510,6 +510,10 @@ video {
     background-color: white;
 }
 
+#contactsList{
+    padding-right: 8px;
+}
+
 .modalBox .contact-card {
     background-color: rgba(0, 0, 0, 0.1);
     margin: 2.5px 0px;
