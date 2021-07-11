@@ -222,6 +222,9 @@
                             document.getElementById('videos').innerHTML=''
                             document.getElementById('chats').style.visibility='visible'
                         }
+                        updateAddParticipants('addParticipantsList', contacts.filter((contact)=>{
+                            return !participants.find((participant)=>{return participant.id==contact.uid})
+                        }));
                     }
                     if(change.type==="removed"){
                         const participant={...change.doc.data(), docID: change.doc.id};
@@ -232,6 +235,9 @@
                             document.getElementById('videos').innerHTML='<i>You are not added in the room.<br/> Please contact Room owner.</i>';
                         }
                         participants.splice(participants.findIndex((p)=>participant.id===p.id),1);
+                        updateAddParticipants('addParticipantsList', contacts.filter((contact)=>{
+                            return !participants.find((participant)=>{return participant.id==contact.uid})
+                        }));
                     }
                 });
             })

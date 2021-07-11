@@ -20,6 +20,7 @@ function updateContactsList(contacts, id) {
                     </div>`;
         contentAll += content;
     }
+    if(contacts.length==0)contentAll="<div style='text-align:center'><i>No Contacts added.</i></div>"
     document.getElementById(id).innerHTML = contentAll;
 }
 /* 

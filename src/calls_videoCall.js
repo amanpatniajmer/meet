@@ -18,6 +18,7 @@ function updateAddParticipants(id, participants) {
         </div>`;
         contentAll += content;
     }
+    if(participants.length==0)contentAll="<div style='text-align:center'><i>No Participants to add.<br/>Add contacts.</i></div>"
     document.getElementById(id).innerHTML = contentAll;
 }
 
