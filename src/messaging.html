@@ -86,7 +86,7 @@
             <div class="content">
                 <form id="addRoomForm">
                     <label>Enter room name:</label>
-                    <input type="text" name="name" />
+                    <input required type="text" name="name" />
                     <div class="text-center"><button type="submit" class="btn-success">Add <i
                                 class="fa fa-plus-circle"></i></button></div>
                 </form>
@@ -275,6 +275,7 @@
                             if(name===undefined) name="Unknown";
                             msg.msg=name+" "+msg.msg.substr(end+1);
                         }
+                        msg.msg=msg.msg.replace(/[\u00A0-\u9999<>\&]/g, (item)=>{return '&#'+item.charCodeAt(0)+';';})
                         document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg));
                     }
                 });

@@ -104,11 +104,17 @@ function listenAuthChange(){
                 name:user.displayName,
                 email:user.email,
             });
-            if(location.href.includes('/index.html'))location.href="/src/messaging.html";
+            if(location.href.includes('/index.html')){
+                let redirection=localStorage.getItem('redirection');
+                localStorage.removeItem('redirection');
+                location.href=redirection;
+            }
         } else {
             console.log('Logged out')
-            console.log(location.href)
-            if(!location.href.includes('/index.html'))location.href='/index.html'
+            if(!location.href.includes('/index.html')){
+                location.href='/index.html'
+                localStorage.setItem("redirection",location.href);
+            }
         }
     });
 }

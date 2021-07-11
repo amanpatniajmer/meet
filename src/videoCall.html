@@ -177,6 +177,7 @@
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added" && change.doc.id!=="details") {
                         let msg={...change.doc.data(), time:change.doc.data().time.toDate()};
+                        msg.msg = msg.msg.replace(/[\u00A0-\u9999<>\&]/g, (item)=>{return '&#'+item.charCodeAt(0)+';';})
                         if(msg.from ==='bot'){
                             let end=msg.msg.indexOf(' ')
                             let name=nickNames[msg.msg.substr(0,end)]
