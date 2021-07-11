@@ -27,10 +27,10 @@ function createParticipantCard(participant) {
         let content = `<div id="${"participant"+participant.docID}" class="contact-card">
             <div class='upper'>
                     <div class='avatar'>
-            ${getAvatar(nickNames[participant.id])}
+            ${getAvatar(nickNames[participant.id]===undefined?"Unknown":nickNames[participant.id])}
             </div>
                     <span class='name'>
-            ${nickNames[participant.id]}
+            ${nickNames[participant.id]===undefined?"Unknown":nickNames[participant.id]}
             </span>
                 </div>
                 <div class='lower'>
