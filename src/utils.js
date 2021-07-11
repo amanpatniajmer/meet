@@ -28,6 +28,7 @@ function getAvatar(name) {
 function search(data, searchString) {
     searchString = searchString.toLowerCase();
     for (const key in data) {
+        if(key==='id' || key==='uid') continue;
         let x = String(data[key]).toLowerCase();
         if (x.includes(searchString)) return true;
     }
@@ -141,12 +142,18 @@ async function fetchParticipants(roomID){
     }).catch((error)=>console.log(error));
 }
 
+async function addMsg(msg){
+    const db = firebase.firestore();
+    usersDB = db.collection('rooms').doc(roomID);
+    return usersDB.collection('chats').add(msg)
+}
+
 function setCallee(roomID) {
     localStorage.setItem("callee", roomID)
     if(roomID===undefined | roomID===null){
         showAlert('danger', 'Please create a room')
     }
     else{
-        window.location.href = "./videoCall.html?room="+roomID;
+        window.location.href = "./videoCall.html?room="+roomID
     }
 }

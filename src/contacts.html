@@ -155,6 +155,7 @@
                     stopLoading()
                     return;
                 }
+                newContact.name=newContact.name.trim();
                 querySnapshot.forEach((doc)=>{
                     newContact={...newContact, uid:doc.id}
                 })
@@ -198,7 +199,7 @@
             const db=firebase.firestore();
             usersDB = db.collection('users').doc(localStorage.getItem('uid'));
             usersDB.collection("contacts").doc(contacts[editIndex].id)
-            .set(newContact)
+            .set(newContact, {merge:true})
             .then((res)=>{
                 showAlert("success", "Successfully edited contact", "fa-check");
                 stopLoading()

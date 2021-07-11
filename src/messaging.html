@@ -221,10 +221,22 @@
 
         function removeParticipant(participantID, docID){
             const db = firebase.firestore();
+            console.log(participantID)
             db.collection('users').doc(participantID).collection('rooms')
-            .doc(rooms.find((room)=>room.id==roomID).docID).delete()
+            .where("id","==", roomID).get()
+            .then((querySnapshot)=>{
+                if(querySnapshot.size==0){
+                    showAlert("danger","User does not exist","fa-close")
+                    stopLoading()
+                    return;
+                }
+                querySnapshot.forEach((doc)=>{
+                    doc.ref.delete().then(()=>console.log('deleted'))
+                })
+            })
             db.collection('rooms').doc(roomID).collection('participants').doc(docID)
             .delete().then(()=>showAlert("success", "Deleted participant", "fa-check"))
+            participants.splice(participants.findIndex((participant)=>participant.id===participantID))
         }
 
         function sendInvite(id){
@@ -305,10 +317,7 @@
             e.preventDefault();
             if(!allowed) return;
             const msg={from:localStorage.getItem('uid'), msg:e.target["msg"].value, time:new Date()};
-            const db = firebase.firestore();
-            usersDB = db.collection('rooms').doc(roomID);
-            usersDB.collection('chats').add(msg)
-            /* document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg)); */
+            addMsg(msg);
             e.target.reset();
         }
 
@@ -324,15 +333,15 @@
         }
 
         function createMsg(msg) {
-            return `<div class="message ${msg.from === localStorage.getItem('uid') ? 'local' : 'remote'}-message">
+            return `<div class="message ${msg.from === localStorage.getItem('uid') ? 'local' : (msg.from==='bot'? 'bot' :'remote')}-message">
                     <div class="name">
-                        ${nickNames[msg.from]===undefined ? "Unknown" :nickNames[msg.from]}
+                        ${msg.from!=='bot'?(nickNames[msg.from]===undefined ? "Unknown" :nickNames[msg.from]):""}
                     </div>
                     <div class="msg">
                     ${msg.msg}
                     </div>
                     <div class="time">
-                        ${new Date(msg.time).toLocaleDateString()+"  "+new Date(msg.time).toLocaleTimeString()}
+                        ${msg.from!=='bot' ?new Date(msg.time).toLocaleDateString()+"  "+new Date(msg.time).toLocaleTimeString() : ""}
                     </div>
                 </div>`
         }

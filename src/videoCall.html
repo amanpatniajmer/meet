@@ -138,6 +138,9 @@
         let uid=localStorage.getItem('uid');
         nickNames[uid]=localStorage.getItem('name')
 
+        const msg={from:"bot",time:new Date(), msg:`${localStorage.getItem('name')} Joined videoChat`}
+        addMsg(msg)
+
         function showAddParticipantsModal() {
             if(!allowed) return;
             toggleVisibility('addParticipantsModal', 'block');
@@ -237,9 +240,9 @@
             e.target.reset();
         }
         function createMsg(msg) {
-            return `<div class="message ${msg.from === uid ? 'local' : 'remote'}-message">
+            return `<div class="message ${msg.from === uid ? 'local' : (msg.from==='bot' ? 'bot':'remote')}-message">
                     <div class="name">
-                        ${nickNames[msg.from]===undefined ? msg.from :nickNames[msg.from]}
+                        ${msg.from!=='bot' ? (nickNames[msg.from]===undefined ? msg.from :nickNames[msg.from]) : ""}
                     </div>
                     <div class="msg">
                     ${msg.msg}

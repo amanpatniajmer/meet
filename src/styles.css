@@ -771,7 +771,6 @@ video {
 
 .message{
     display: flex;
-    min-width: 100px;
     flex-direction: column;
     border-radius: 5px;
     padding: 5px;
@@ -789,12 +788,14 @@ video {
 }
 
 .local-message{
+    min-width: 100px;
     align-self: flex-start;
     max-width: 90%;
     background-color: #c5f1b9;
 }
 
 .remote-message{
+    min-width: 100px;
     align-self: flex-end;
     max-width:90%;
     background-color: #e6c888;
@@ -809,7 +810,8 @@ video {
 .bot-message{
     align-self: center;
     max-width:90%;
-    background-color: var(--primary-color);
+    background-color: var(--light-color);
+    font-size: 12px;
 }
 
 .msgInput{
