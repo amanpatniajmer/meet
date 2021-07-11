@@ -248,7 +248,7 @@
         function createMsg(msg) {
             return `<div class="message ${msg.from === uid ? 'local' : (msg.from==='bot' ? 'bot':'remote')}-message">
                     <div class="name">
-                        ${msg.from!=='bot' ? (nickNames[msg.from]===undefined ? msg.from :nickNames[msg.from]) : ""}
+                        ${msg.from!=='bot' ? (nickNames[msg.from]===undefined ? "Unknown" :nickNames[msg.from]) : ""}
                     </div>
                     <div class="msg">
                         ${msg.msg}
