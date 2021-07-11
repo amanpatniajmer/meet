@@ -186,6 +186,7 @@
             editID = id;
             document.getElementById('editContactModal').style.display = 'block';
             let form = document.getElementById('editContactForm');
+            let index=contacts.findIndex((contact)=>contact.id==id);
             for (let key in contacts[index]) {
                 if (!form.elements.hasOwnProperty(key)) continue;
                 form.elements[key].value = contacts[index][key];
