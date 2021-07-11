@@ -61,7 +61,7 @@
         <div class="main-window">
             <nav class="main-nav nav">
                 <ul>
-                    <h1>Meeting App</h1>
+                    <h1>LinkUp</h1>
                     <li class="right-align">
                         <div class="avatar">
                             AJ
@@ -127,18 +127,21 @@
     </div>
     <script src="./messaging.js"></script>
     <script>
+        name=localStorage.getItem('name');
+        uid=localStorage.getItem('uid');
+        document.querySelector('.main-nav .avatar').innerHTML=getAvatar(name)
         startLoading();
         let roomID = window.location.search.substr(6, window.location.search.length - 1);
         let rooms = [];
         let participants=[];
         let nickNames={};
-        nickNames[localStorage.getItem('uid')]=localStorage.getItem('name')
+        nickNames[uid]=name
         let contacts=[];
         let allowed=false;
         document.onload = roomID? loadChat(roomID):updateRooms();
         async function updateRooms() {
             const db = firebase.firestore();
-            usersDB = db.collection('users').doc(localStorage.getItem('uid'))
+            usersDB = db.collection('users').doc(uid)
             .collection('rooms').onSnapshot((snapshot)=>{
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
@@ -153,7 +156,7 @@
 
         function fetchRooms(){
             const db = firebase.firestore();
-            usersDB = db.collection('users').doc(localStorage.getItem('uid'))
+            usersDB = db.collection('users').doc(uid)
             .collection('rooms').onSnapshot((snapshot)=>{
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
@@ -190,15 +193,15 @@
             startLoading();
             const newRoom = formToJSON(e.target);
             const db=firebase.firestore();
-            db.collection('users').doc(localStorage.getItem('uid'));
+            db.collection('users').doc(uid);
             db.collection("rooms").add(newRoom).then((room)=>{
                 console.log(room.id);
                 postRequest(room.id)
                 console.log(newRoom)
-                room.collection("participants").add({id:localStorage.getItem('uid')}).then(()=>{
+                room.collection("participants").add({id:uid}).then(()=>{
                     console.log('added to')
                 })
-                db.collection("users").doc(localStorage.getItem('uid')).collection('rooms').add({
+                db.collection("users").doc(uid).collection('rooms').add({
                     id:room.id,
                     name:newRoom.name
                 })
@@ -300,13 +303,13 @@
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
                         const participant={...change.doc.data(), docID: change.doc.id};
-                        if(participant.id===localStorage.getItem('uid')) allowed=true;
+                        if(participant.id===uid) allowed=true;
                         participants.push(participant);
                         document.getElementById('participantsList').insertAdjacentHTML('beforeend',createParticipantCard(participant));
                     }
                     if(change.type==="removed"){
                         const participant={...change.doc.data(), docID: change.doc.id};
-                        if(participant.id===localStorage.getItem('uid')) allowed=false;
+                        if(participant.id===uid) allowed=false;
                         participants.splice(participants.findIndex((p)=>participant.id===p.id),1);
                         document.getElementById('participant'+participant.docID).remove();
                     }
@@ -316,7 +319,7 @@
         function sendMsg(e){
             e.preventDefault();
             if(!allowed) return;
-            const msg={from:localStorage.getItem('uid'), msg:e.target["msg"].value, time:new Date()};
+            const msg={from:uid, msg:e.target["msg"].value, time:new Date()};
             addMsg(msg);
             e.target.reset();
         }
@@ -333,7 +336,7 @@
         }
 
         function createMsg(msg) {
-            return `<div class="message ${msg.from === localStorage.getItem('uid') ? 'local' : (msg.from==='bot'? 'bot' :'remote')}-message">
+            return `<div class="message ${msg.from === uid ? 'local' : (msg.from==='bot'? 'bot' :'remote')}-message">
                     <div class="name">
                         ${msg.from!=='bot'?(nickNames[msg.from]===undefined ? "Unknown" :nickNames[msg.from]):""}
                     </div>

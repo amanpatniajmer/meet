@@ -61,7 +61,7 @@
         <div class="main-window">
             <nav class="main-nav nav">
                 <ul>
-                    <h1>Meeting App</h1>
+                    <h1>LinkUp</h1>
                     <li class="right-align">
                         <div class="avatar">
                             AJ
@@ -122,6 +122,9 @@
     </div>
     <script src="./calls_contacts.js"></script>
     <script>
+        name=localStorage.getItem('name')
+        uid=localStorage.getItem('uid');
+        document.querySelector('.main-nav .avatar').innerHTML=getAvatar(name)
         startLoading();
         let contacts = [];
         document.onload=fetchContacts().then((tcontacts)=>{

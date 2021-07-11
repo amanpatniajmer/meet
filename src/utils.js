@@ -98,6 +98,8 @@ function listenAuthChange(){
             localStorage.setItem('name', user.displayName);
             localStorage.setItem('email', user.email);
             localStorage.setItem('uid', user.uid);
+            var uid=user.uid;
+            var name=user.displayName
             const db=firebase.firestore();
             db.collection('users').doc(user.uid).set({
                 name:user.displayName,

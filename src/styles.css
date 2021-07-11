@@ -794,14 +794,14 @@ video {
 
 .local-message{
     min-width: 100px;
-    align-self: flex-start;
+    align-self: flex-end;
     max-width: 90%;
     background-color: #c5f1b9;
 }
 
 .remote-message{
     min-width: 100px;
-    align-self: flex-end;
+    align-self: flex-start;
     max-width:90%;
     background-color: #e6c888;
 }
