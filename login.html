@@ -7,10 +7,60 @@
     <title>Document</title>
     <link rel="stylesheet" href="/src/styles.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <style>
+        .bg{
+            background-image: url('./src/chat.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            filter:opacity(0.8) blur(1px);
+            height: 100%;
+            width: 100%;
+        }
+        html{
+            height: 100vh;
+        }
+        body{
+            height: 100%;
+            background-color: rgb(0, 0, 0);
+        }
+        .form-container{
+            z-index: 250;
+            top:50%;
+            left:50%;
+            transform: translate(-50%,-50%);
+            position: absolute;
+            background-color: rgba(200, 200, 200, 0.8);
+            color: #000;
+            border: 1px solid rgba(0,0,0,0.5);
+            box-shadow: 5px 5px 0px 0px rgb(60 58 58);
+        }
+        .about{
+            color: #fff;
+            position: absolute;
+            z-index: 25;
+            top:0;
+            left:50%;
+            background-color: rgba(236,174,39,0.9);
+            box-shadow: 2px 4px 0px 0px rgb(60 58 58);
+            border-radius: 20px;
+            padding: 10px;
+            transform: translate(-50%);
+            margin-top: 20px;
+            text-align: center;
+        }
+        .about > *{
+            margin:0
+        }
+    </style>
 </head>
 <body>
+    <div class="bg"></div>
+    <div class="about">
+        <h3>Connect with your friends with JUST ONE CLICK!</h3>
+    </div>
         <div class="form-container">
-            <h1>Meeting App</h1>
+            <h1>LinkUp</h1>
             <span>Please Login to continue!</span>
             <br/><br/>
             <button id="googleLogin" onclick="googleLogin()">

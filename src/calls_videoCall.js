@@ -1,23 +1,21 @@
 function updateAddParticipants(id, participants) {
     let contentAll = '';
     for (let i = 0; i < participants.length; i++) {
-        let content = "<div class='contact-card'>\
-            <div class='upper'>\
-                <div>\
-                    <div class='avatar'>" +
-            getAvatar(participants[i].name) +
-            "</div>\
-                    <span class='name'>" +
-            participants[i].name +
-            "</span>\
-                </div></div>\
-               <div class='lower'>\
-                    <button onclick='sendInvite(\"" +
-            participants[i].uid +
-            "\")'>Invite <i class='fa fa-plus'></i> </button>\
-               </div>\
-            </div>\
-        </div>";
+        let content = `<div class='contact-card'>
+            <div class='upper'>
+                <div>
+                    <div class='avatar' style="background-color: ${getAvatarColor(participants[i].name)}">
+            ${getAvatar(participants[i].name)}
+            </div>
+                    <span class='name'>
+            ${participants[i].name}
+            </span>
+                </div></div>
+               <div class='lower'>
+                    <button onclick='sendInvite("${participants[i].uid}")'>Invite <i class='fa fa-plus'></i> </button>
+               </div>
+            </div>
+        </div>`;
         contentAll += content;
     }
     document.getElementById(id).innerHTML = contentAll;

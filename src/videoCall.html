@@ -168,7 +168,6 @@
             Promise.all([fetchContacts(), addMsg(msg)]).then((values)=>{
                 let date=new Date();
                 contacts=values[0];
-                console.log(contacts)
                 contacts.forEach((contact)=>nickNames[contact["uid"]]=contact["name"])
                 roomsDB.collection("chats").orderBy('time').onSnapshot((snapshot) => {
                 snapshot.docChanges().forEach((change) => {
