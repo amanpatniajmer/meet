@@ -65,7 +65,7 @@
                 </ul>
             </nav>
             <div id="videos">
-                
+                <i>You are not added in the room.<br/> Please contact Room owner.</i>
             </div>
         </div>
     </div>
@@ -218,9 +218,6 @@
                                 return !participants.find((participant)=>{return participant.id==contact.uid})
                             }));
                         }
-                        else{
-                            document.getElementById('videos').innerHTML='<i>You are not added in the room.<br/> Please contact Room owner.</i>'
-                        }
                     }
                     if(change.type==="removed"){
                         const participant={...change.doc.data(), docID: change.doc.id};
@@ -228,6 +225,7 @@
                             allowed=false;
                             document.getElementById('chats').style.visibility='hidden'
                             callFrame.leave();
+                            document.getElementById('videos').innerHTML='<i>You are not added in the room.<br/> Please contact Room owner.</i>';
                         }
                         participants.splice(participants.findIndex((p)=>participant.id===p.id),1);
                         updateAddParticipants('addParticipantsList', contacts.filter((contact)=>{
