@@ -137,6 +137,7 @@
         }
 
         function showWhiteboard(){
+            if(!allowed) return;
             window.open(`./board.html?room=${roomID}`, "_blank");
         }
 
@@ -219,7 +220,11 @@
                     }
                     if(change.type==="removed"){
                         const participant={...change.doc.data(), docID: change.doc.id};
-                        if(participant.id===localStorage.getItem('uid')) allowed=false;
+                        if(participant.id===localStorage.getItem('uid')){
+                            allowed=false;
+                            document.getElementById('chats').style.visibility='hidden'
+                            callFrame.leave();
+                        }
                         participants.splice(participants.findIndex((p)=>participant.id===p.id),1);
                         updateAddParticipants('addParticipantsList', contacts.filter((contact)=>{
                             return !participants.find((participant)=>{return participant.id==contact.uid})
