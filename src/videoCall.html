@@ -248,9 +248,7 @@
             let temp=e.target["msg"].value.trim();
             if(!allowed || temp==null || temp==undefined || temp=='') return;
             const msg={from:uid, msg:temp, time:new Date()};
-            const db = firebase.firestore();
-            roomsDB = db.collection('rooms').doc(roomID);
-            roomsDB.collection('chats').add(msg)
+            addMsg(msg);
             e.target.reset();
         }
         function createMsg(msg) {

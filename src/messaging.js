@@ -40,7 +40,7 @@ function createParticipantCard(participant) {
 }
 
 function createRoomCard(room) {
-        let content = `<div class='contact-card' style='cursor:pointer' onclick="setRemoteChat('${room.id}', '${room.name}')">
+        let content = `<div class='contact-card' id=${"room"+room.id} style='cursor:pointer' onclick="setRemoteChat('${room.id}', '${room.name}')">
                     <div class='upper'>
                     <div class='avatar' style="background-color:
             ${getAvatarColor(room.id)}">

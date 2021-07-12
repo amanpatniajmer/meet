@@ -146,6 +146,11 @@
                         rooms.push(room);
                         document.getElementById('roomsList').insertAdjacentHTML('beforeend',createRoomCard(room));
                     }
+                    if(change.type==="removed"){
+                        const deletedRoom={...change.doc.data(), docID:change.doc.id};
+                        rooms.splice(rooms.findIndex((room)=>room.id===deletedRoom.id));
+                        document.getElementById('room'+deletedRoom.id);
+                    }
                 })
                 stopLoading();
             })
@@ -314,7 +319,10 @@
                     }
                     if(change.type==="removed"){
                         const participant={...change.doc.data(), docID: change.doc.id};
-                        if(participant.id===uid) allowed=false;
+                        if(participant.id===uid) {
+                            allowed=false;
+                            location.href='/src/messaging.html';
+                        }
                         participants.splice(participants.findIndex((p)=>participant.id===p.id),1);
                         document.getElementById('participant'+participant.docID).remove();
                     }
@@ -323,8 +331,9 @@
         }
         function sendMsg(e){
             e.preventDefault();
-            if(!allowed) return;
-            const msg={from:uid, msg:e.target["msg"].value, time:new Date()};
+            let temp=e.target["msg"].value.trim();
+            if(!allowed || temp==null || temp==undefined || temp=='') return;
+            const msg={from:uid, msg:temp, time:new Date()};
             addMsg(msg);
             e.target.reset();
         }
