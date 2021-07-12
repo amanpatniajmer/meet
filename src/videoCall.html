@@ -30,6 +30,17 @@
     firebase.initializeApp(firebaseConfig);
     listenAuthChange();
 </script>
+<style>
+    #sideWindow > h3{
+        background-color: black;
+        margin:0;
+        padding: 1em;
+    }
+    #sendMsg{
+        padding: 5px 5px;
+        margin:0;
+    }
+</style>
 </head>
 
 <body style="overflow: hidden;">
@@ -201,7 +212,7 @@
             <div id="chats" class="chats" style="height: calc(100% - 120px);">
                  
             </div>
-            <form id="sendMsg" style="display:flex;  margin-top: 10px !important;">
+            <form id="sendMsg" style="display:flex;">
                 <textarea name="msg" class="msgInput"></textarea>
                 <button type="submit" style="margin:0"><i class="fa fa-send"></i></button>
             </form>`;

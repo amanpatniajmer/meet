@@ -149,7 +149,7 @@
                     if(change.type==="removed"){
                         const deletedRoom={...change.doc.data(), docID:change.doc.id};
                         rooms.splice(rooms.findIndex((room)=>room.id===deletedRoom.id));
-                        document.getElementById('room'+deletedRoom.id);
+                        document.getElementById('room'+deletedRoom.id).remove();
                     }
                 })
                 stopLoading();
