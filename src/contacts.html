@@ -103,7 +103,7 @@
                     <label>Edit contact name:</label>
                     <input required type="text" name="name" />
                     <label>Edit contact email:</label>
-                    <input required type="email" name="email" />
+                    <input disabled required type="email" name="email" />
                     <div class="text-center"><button type="submit" class="btn-success">Edit <i
                                 class="fa fa-pencil"></i></button></div>
                 </form>
@@ -156,6 +156,7 @@
                     return;
                 }
                 newContact.name=newContact.name.trim();
+                if(newContact.name==='' | newContact.name===null | newContact.name===undefined) return;
                 querySnapshot.forEach((doc)=>{
                     newContact={...newContact, uid:doc.id}
                 })
@@ -199,6 +200,7 @@
             if(editID===null) return;
             const newContact = formToJSON(e.target);
             newContact.name=newContact.name.trim();
+            if(newContact.name==='' | newContact.name===null | newContact.name===undefined) return;
             const db=firebase.firestore();
             usersDB = db.collection('users').doc(uid);
             usersDB.collection("contacts").doc(editID)
@@ -208,7 +210,8 @@
                 stopLoading()
             })
             .catch((err)=>console.log(err));
-            contacts[contacts.findIndex((contact)=>contact.id==editID)] = newContact;
+            let tempi=contacts.findIndex((contact)=>contact.id==editID);
+            contacts[tempi].name = newContact.name;
             updateContactsList(contacts, 'contactsList');
             editContactForm.reset();
             editID = null;
