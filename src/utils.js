@@ -104,16 +104,16 @@ function listenAuthChange(){
                 name:user.displayName,
                 email:user.email,
             });
-            if(location.href.includes('/index.html')){
-                let redirection=localStorage.getItem('redirection');
+            if(location.pathname==='/' | location.pathname==='/index.html'){
+                let redirection=localStorage.getItem('redirection')?localStorage.getItem('redirection'):'/src/contacts.html';
                 localStorage.removeItem('redirection');
                 location.href=redirection;
             }
         } else {
             console.log('Logged out')
-            if(!location.href.includes('/index.html')){
-                location.href='/index.html'
+            if(!(location.pathname==='/' | location.pathname==='/index.html')){
                 localStorage.setItem("redirection",location.href);
+                location.href='/index.html'
             }
         }
     });
