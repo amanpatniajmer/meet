@@ -156,7 +156,11 @@
                     return;
                 }
                 newContact.name=newContact.name.trim();
-                if(newContact.name==='' | newContact.name===null | newContact.name===undefined) return;
+                if(newContact.name==='' | newContact.name===null | newContact.name===undefined) {
+                    showAlert("danger","User name cannot be empty","fa-close")
+                    stopLoading()
+                    return;
+                }
                 querySnapshot.forEach((doc)=>{
                     newContact={...newContact, uid:doc.id}
                 })
@@ -200,7 +204,11 @@
             if(editID===null) return;
             const newContact = formToJSON(e.target);
             newContact.name=newContact.name.trim();
-            if(newContact.name==='' | newContact.name===null | newContact.name===undefined) return;
+            if(newContact.name==='' | newContact.name===null | newContact.name===undefined) {
+                showAlert("danger","User name cannot be empty","fa-close")
+                stopLoading()
+                return;
+            }
             const db=firebase.firestore();
             usersDB = db.collection('users').doc(uid);
             usersDB.collection("contacts").doc(editID)
