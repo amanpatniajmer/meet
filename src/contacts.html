@@ -38,8 +38,6 @@
     </header>
     <div>
         <div class="side-nav">
-            <div class="top">
-            </div>
             <div class="mid">
             <a href="./messaging.html">
                 <i class="fa fa-commenting-o"></i>
@@ -48,11 +46,6 @@
                 <i class="fa fa-phone"></i>
             </a>
             </div>
-            <div class="bottom">
-                <a href="#" onclick="logout()">
-                    <i class="fa fa-sign-out"></i>
-                </a>
-            </div>
         </div>
 
         <div class="main-window">
@@ -60,9 +53,12 @@
                 <ul>
                     <h1>LinkUp</h1>
                     <li class="right-align">
-                        <div class="avatar">
-                            AJ
-                        </div>
+                        <span id="name"></span><i class="fa fa-user"></i>
+                        <button class="btn-primary border-radius">
+                            <a href="#" onclick="logout()">
+                                Logout <i class="fa fa-sign-out"></i>
+                            </a>
+                        </button>
                     </li>
                 </ul>
             </nav>
@@ -121,7 +117,7 @@
     <script>
         name=localStorage.getItem('name')
         uid=localStorage.getItem('uid');
-        document.querySelector('.main-nav .avatar').innerHTML=getAvatar(name)
+        document.querySelector('.main-nav #name').innerHTML=name+" ";
         startLoading();
         let contacts = [];
         document.onload=fetchContacts().then((tcontacts)=>{

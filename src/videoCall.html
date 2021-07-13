@@ -69,9 +69,12 @@
                 <ul>
                     <h1>LinkUp</h1>
                     <li class="right-align">
-                        <div class="avatar">
-                            
-                        </div>
+                        <span id="name"></span><i class="fa fa-user"></i>
+                        <button class="btn-primary border-radius">
+                            <a href="#" onclick="logout()">
+                                Logout <i class="fa fa-sign-out"></i>
+                            </a>
+                        </button>
                     </li>
                 </ul>
             </nav>
@@ -112,7 +115,7 @@
     </div>
     <script src="./calls_videoCall.js"></script>
     <script>
-        document.querySelector('.main-nav .avatar').innerHTML=getAvatar(name)
+        document.querySelector('.main-nav #name').innerHTML=name+" ";
 
         let roomID = window.location.search.substr(6, window.location.search.length - 1);
         let allowed=false;
