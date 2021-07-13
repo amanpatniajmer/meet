@@ -11,13 +11,25 @@
         "src": "/logo_transparent152x152.png",
         "type": "image/png",
         "sizes": "152x152",
-        "purpoes":"any"
+        "purpose":"any"
     },
     {
         "src": "/logo_transparent948x948.png",
         "type": "image/png",
         "sizes": "948x948",
-        "purpoes":"any"
+        "purpose":"any"
+    },
+    {
+        "src": "/logo_transparent152x152.png",
+        "type": "image/png",
+        "sizes": "152x152",
+        "purpose":"maskable"
+    },
+    {
+        "src": "/logo_transparent948x948.png",
+        "type": "image/png",
+        "sizes": "948x948",
+        "purpose":"maskable"
     }
   ],
   "prefer_related_applications": false,

@@ -277,6 +277,14 @@ button[type="submit"] {
     align-items: center;
 }
 
+#name{
+    display: inline-block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width:70%;
+}
+
 .side-nav .mid{
     display: flex;
     background-color: var(--primary-color);
@@ -897,7 +905,7 @@ video {
     position: fixed;
     background-color: rgb(57, 57, 57);
     border: 1px solid black;
-    width: calc(100vw - 2.4rem);
+    width: calc(100vw - 2.8rem);
     height: 40px;
     left: 2.6rem;
     top: 80px;
