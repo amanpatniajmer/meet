@@ -8,19 +8,16 @@
   "background_color": "#ffffff",
   "icons":[
     {
-        "src": "/logo_transparent.png",
+        "src": "/logo_transparent152x152.png",
         "type": "image/png",
-        "sizes": "1280x948"
-    },
-    {
-        "src": "/logo_transparent205x152.png",
-        "type": "image/png",
-        "sizes": "205x152"
+        "sizes": "152x152",
+        "purpoes":"any"
     },
     {
         "src": "/logo_transparent948x948.png",
         "type": "image/png",
-        "sizes": "948x948"
+        "sizes": "948x948",
+        "purpoes":"any"
     }
   ],
   "prefer_related_applications": false,
