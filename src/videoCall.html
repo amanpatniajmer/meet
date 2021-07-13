@@ -56,9 +56,15 @@
         margin:0;
         padding: 1em;
     }
+    .main-window{
+        margin: 0 !important;
+    }
     #sendMsg{
         padding: 5px 5px;
         margin:0;
+    }
+    .side-nav{
+        display:none;
     }
 </style>
 </head>
@@ -80,7 +86,7 @@
         <div class="main-window">
             <nav class="main-nav nav">
                 <ul>
-                    <h1>LinkUp</h1>
+                    <a href="/"><h1><img src="/logo_transparent152x152.png">LinkUp</h1></a>
                     <li class="right-align">
                         <span id="name"></span>
                         <button class="btn-primary border-radius">
@@ -150,9 +156,9 @@
                 iframeStyle: {
                     position: 'fixed',
                     border: '1px solid black',
-                    width: 'calc(100vw - 2.8rem)',
+                    width: 'calc(100vw - 10px)',
                     height: 'calc(100vh - 150px)',
-                    left: '2.6rem',
+                    left: '5px',
                     top: '80px'
                 },
                 showLeaveButton: true,

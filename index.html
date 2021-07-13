@@ -54,13 +54,11 @@
         }
         h3{
             z-index: 25;
-            padding: 10px;
             margin-bottom: 20px;
         }
         h1{
             color: var(--dark-primary-color);
             z-index: 25;
-            padding: 10px;
             margin-bottom: 20px;
         }
         .about .form-container{
@@ -70,13 +68,14 @@
             border: none;
             min-height: 0;
             min-width: 250px;
+            max-height: 100%;
         }
         .about{
             padding: 5px;
             width:100%;
             padding: 25px;
         }
-        img{
+        .container > img{
             height: 100%;
             max-width: 70%;
             object-fit: contain;
@@ -88,7 +87,7 @@
         }
 
         @media (max-width: 570px) {
-            img{
+            .container > img{
                 display: none;
             }
             .bg{
@@ -112,6 +111,7 @@
     <div class="container">
         <div class="about form-container">
             <h3>Missing your Friends?</h3>
+            <img src="/logo_transparent152x152.png">
             <h1>Let's LinkUp!</h1>
             <div>
                 <span>Please Login to continue!</span>
