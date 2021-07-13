@@ -1,0 +1,28 @@
+{
+  "short_name": "LinkUp",
+  "name": "LinkUp",
+  "description":"Linkup is a web app using which you can link up with your friends with just one click.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "theme_color": "#6666aa",
+  "background_color": "#ffffff",
+  "icons":[
+    {
+        "src": "/logo_transparent.png",
+        "type": "image/png",
+        "sizes": "1280x948"
+    },
+    {
+        "src": "/logo_transparent205x152.png",
+        "type": "image/png",
+        "sizes": "205x152"
+    },
+    {
+        "src": "/logo_transparent412x412.png",
+        "type": "image/png",
+        "sizes": "412x412"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}

@@ -5,7 +5,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MS Teams Clone</title>
+    <title>LinkUp</title>
+    <meta name="theme-color" content="#6666aa" />
+    <meta
+      name="LinkUp"
+      content="Linkup is a web app using which you can link up with your friends with just one click."
+    />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/logo_transparent205x152.png" type="image/png">
+
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
@@ -28,7 +36,19 @@
         measurementId: "G-0DKCPEVW7W"
     };
     firebase.initializeApp(firebaseConfig);
-    listenAuthChange();
+    var db;
+    async function initializeFirestore(){
+        return firebase.firestore().enablePersistence()
+    }
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+        .then(function(registration) {
+            console.log('Registration successful, scope is:', registration.scope);
+        })
+        .catch(function(error) {
+            console.log('Service worker registration failed, error:', error);
+        });
+    }
 </script>
 </head>
 
@@ -120,11 +140,19 @@
         document.querySelector('.main-nav #name').innerHTML=name+" ";
         startLoading();
         let contacts = [];
-        document.onload=fetchContacts().then((tcontacts)=>{
-            contacts=tcontacts;
-            updateContactsList(contacts, 'contactsList')
-            stopLoading();
+
+        document.onload=Promise.all([initializeFirestore()])
+        .then(()=>{
+            db=firebase.firestore();
+            listenAuthChange();
+            fetchContacts().
+            then((tcontacts)=>{
+                contacts=tcontacts;
+                updateContactsList(contacts, 'contactsList')
+                stopLoading();
+            })
         })
+        .catch((e)=>console.log(e))
 
         let addContactForm = document.getElementById('addContactForm');
         addContactForm.onsubmit = function(e) {
@@ -143,7 +171,6 @@
                     return;
                 }
             }
-            const db=firebase.firestore();
             db.collection('users').where("email","==", newContact.email).get()
             .then((querySnapshot)=>{
                 if(querySnapshot.size!=1){
@@ -205,25 +232,23 @@
                 stopLoading()
                 return;
             }
-            const db=firebase.firestore();
             usersDB = db.collection('users').doc(uid);
             usersDB.collection("contacts").doc(editID)
             .set(newContact, {merge:true})
             .then((res)=>{
                 showAlert("success", "Successfully edited contact", "fa-check");
-                stopLoading()
+                let tempi=contacts.findIndex((contact)=>contact.id==editID);
+                contacts[tempi].name = newContact.name;
+                updateContactsList(contacts, 'contactsList');
+                editContactForm.reset();
+                editID = null;                    
             })
             .catch((err)=>console.log(err));
-            let tempi=contacts.findIndex((contact)=>contact.id==editID);
-            contacts[tempi].name = newContact.name;
-            updateContactsList(contacts, 'contactsList');
-            editContactForm.reset();
-            editID = null;
+            stopLoading()
         }
 
         function deleteContact(id) {
             startLoading();
-            const db=firebase.firestore();
             usersDB = db.collection('users').doc(uid);
             usersDB.collection("contacts").doc(id)
             .delete()

@@ -91,7 +91,7 @@ function logout(){
     });
 }
 
-function listenAuthChange(){
+async function listenAuthChange(){
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             localStorage.setItem('name', user.displayName);
@@ -99,7 +99,6 @@ function listenAuthChange(){
             localStorage.setItem('uid', user.uid);
             var uid=user.uid;
             var name=user.displayName
-            const db=firebase.firestore();
             db.collection('users').doc(user.uid).set({
                 name:user.displayName,
                 email:user.email,
@@ -125,7 +124,6 @@ function scrollDown(id){
 }
 
 async function fetchContacts(){
-    const db=firebase.firestore();
     let contacts=[];
     usersDB = db.collection('users').doc(localStorage.getItem('uid'));
     return usersDB.collection('contacts').get().then((querySnapshot) => {
@@ -137,7 +135,6 @@ async function fetchContacts(){
 }
 
 async function fetchParticipants(roomID){
-    const db=firebase.firestore();
     let participants=[];
     roomsDB = db.collection('rooms').doc(roomID);
     return roomsDB.collection('participants').get().then((querySnapshot) => {
@@ -150,7 +147,6 @@ async function fetchParticipants(roomID){
 }
 
 async function addMsg(msg){
-    const db = firebase.firestore();
     usersDB = db.collection('rooms').doc(roomID);
     return usersDB.collection('chats').add(msg)
 }

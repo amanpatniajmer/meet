@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whiteboard</title>
+    <title>LinkUp</title>
+    <meta name="theme-color" content="#6666aa" />
+    <meta
+      name="LinkUp"
+      content="Linkup is a web app using which you can link up with your friends with just one click."
+    />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/logo_transparent205x152.png" type="image/png">
     <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js"></script>
 
     <!-- TODO: Add SDKs for Firebase products that you want to use
@@ -23,7 +30,17 @@
         measurementId: "G-0DKCPEVW7W"
     };
     firebase.initializeApp(firebaseConfig);
+    var db=firebase.firestore();
     listenAuthChange();
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+        .then(function(registration) {
+            console.log('Registration successful, scope is:', registration.scope);
+        })
+        .catch(function(error) {
+            console.log('Service worker registration failed, error:', error);
+        });
+    }
     </script>
 </head>
 <body>

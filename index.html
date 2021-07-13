@@ -4,9 +4,29 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>LinkUp</title>
+    <meta name="theme-color" content="#6666aa" />
+    <meta
+      name="LinkUp"
+      content="Linkup is a web app using which you can link up with your friends with just one click."
+    />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/logo_transparent205x152.png" type="image/png">
     <link rel="stylesheet" href="/src/styles.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                .then(function(registration) {
+                    console.log('Registration successful, scope is:', registration.scope);
+                })
+                .catch(function(error) {
+                    console.log('Service worker registration failed, error:', error);
+                });
+            })
+    }
+    </script>
     <style>
         .bg{
             display: none;
@@ -128,8 +148,8 @@
         measurementId: "G-0DKCPEVW7W"
     };
     firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
     listenAuthChange();
-    const db = firebase.firestore();
     async function login(provider){
         firebase.auth()
         .signInWithPopup(provider)

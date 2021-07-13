@@ -5,7 +5,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MS Teams Clone</title>
+    <title>LinkUp</title>
+    <meta name="theme-color" content="#6666aa" />
+    <meta
+      name="LinkUp"
+      content="Linkup is a web app using which you can link up with your friends with just one click."
+    />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/logo_transparent205x152.png" type="image/png">
     <link rel="stylesheet" href="styles.css" />
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
@@ -28,7 +35,19 @@
         measurementId: "G-0DKCPEVW7W"
     };
     firebase.initializeApp(firebaseConfig);
-    listenAuthChange();
+    var db;
+    async function initializeFirestore(){
+        return firebase.firestore().enablePersistence()
+    }
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+        .then(function(registration) {
+            console.log('Registration successful, scope is:', registration.scope);
+        })
+        .catch(function(error) {
+            console.log('Service worker registration failed, error:', error);
+        });
+    }
 </script>
 <style>
     #sideWindow > h3{
@@ -119,6 +138,12 @@
         name=localStorage.getItem('name');
         nickNames[uid]='You'
 
+        document.onload=Promise.all([initializeFirestore()]).then(()=>{
+            db=firebase.firestore();
+            listenAuthChange();
+            loadChat(roomID);
+        })
+
         function createFrameAndJoinRoom() {
             window.callFrame = window.DailyIframe.createFrame({
                 iframeStyle: {
@@ -155,7 +180,6 @@
         }
 
         function sendInvite(id){
-            const db = firebase.firestore();
             db.collection('users').doc(id).collection('rooms').add({
                 id:roomID,
                 name:localStorage.getItem("roomName")
@@ -202,7 +226,6 @@
                 scrollDown("chats");
             })
             });
-            const db = firebase.firestore();
             roomsDB = db.collection('rooms').doc(id);
             document.getElementById('sideWindow').innerHTML = `<h3>${localStorage.getItem('roomName')}</h3>
             <div id="chats" class="chats" style="height: calc(100% - 120px);">
@@ -268,7 +291,6 @@
                     </div>
                 </div>`
         }
-        loadChat(roomID)
         function toggleReaction(className){
             if(!allowed) return;
             let classList;
