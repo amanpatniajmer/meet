@@ -268,7 +268,6 @@ button[type="submit"] {
 .main-nav ul {
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap;
     align-items: center;
 }
 
@@ -323,7 +322,7 @@ button[type="submit"] {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    width:70%;
+    width:100%;
 }
 
 .side-nav .mid{
