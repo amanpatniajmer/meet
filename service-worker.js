@@ -1,5 +1,5 @@
 
-var cacheName='cache-v1';
+var cacheName='cache-v2';
 var resources=[
     
 ];
