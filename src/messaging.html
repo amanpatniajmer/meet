@@ -296,12 +296,12 @@
                         msg.msg=msg.msg.replace(/[\u00A0-\u9999<>\&]/g, (item)=>{return '&#'+item.charCodeAt(0)+';';})
                         document.getElementById('chats').insertAdjacentHTML('beforeend',createMsg(msg));
                     }
-                });
-                stopLoading();
-                scrollDown("chats");
-            })
-            });
-            const msgs = [];
+                    });
+                    stopLoading();
+                    scrollDown("chats");
+                })
+
+                const msgs = [];
             document.getElementsByClassName('tab')[0].innerHTML = `<h3>${localStorage.getItem('roomName')}</h3>
                 <div class="filters">
                     <button onclick="setCallee(roomID)" class="btn border-radius" id="addContact"><i class="fa fa-video-camera"></i></button>
@@ -341,6 +341,9 @@
                     }
                 });
             })
+
+
+            });
         }
         function sendMsg(e){
             e.preventDefault();
